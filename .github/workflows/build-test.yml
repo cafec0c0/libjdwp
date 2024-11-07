@@ -1,0 +1,89 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build_debug:
+    name: "Build Debug"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install library dependencies
+        run: sudo apt update --quiet && sudo apt install --quiet -y libcmocka-dev
+      - name: Configure
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug
+      - name: Build library
+        run: cmake --build build --target jdwp
+
+  test_unit:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: build_debug
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install test and runtime dependencies
+        run: sudo apt update --quiet && sudo apt install --quiet -y libcmocka-dev
+      - name: Configure unit tests
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DJDWP_UNIT_TEST=1
+      - name: Build unit tests
+        run: cmake --build build
+      - name: Run unit tests
+        run: ctest --test-dir build --verbose
+
+  test_unit_memcheck:
+    name: Unit Tests (with memcheck)
+    runs-on: ubuntu-latest
+    needs: build_debug
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install test and runtime dependencies
+        run: sudo apt update --quiet && sudo apt install --quiet -y libcmocka-dev valgrind
+      - name: Configure unit tests
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DJDWP_UNIT_TEST=1
+      - name: Build unit tests
+        run: cmake --build build
+      - name: Run unit tests with memcheck
+        run: ctest --test-dir build --verbose -T memcheck --overwrite MemoryCheckCommand="/usr/bin/valgrind"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: memcheck-logs-run-${{ github.run_number }}-attempt-${{ github.run_attempt }}-${{ runner.os }}
+          path: build/Testing/Temporary/MemoryChecker*.log
+          retention-days: 7
+
+  test_e2e:
+    name: "E2E Tests"
+    runs-on: ubuntu-latest
+    needs: build_debug
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install test and runtime dependencies
+        run: sudo apt update --quiet && sudo apt install --quiet -y libcmocka-dev
+      - name: Configure unit tests
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DJDWP_E2E_TEST=1 -DJDWP_ENABLE_FIXTURES=1
+      - name: Build unit tests
+        run: cmake --build build
+      - name: Run unit tests with memcheck
+        run: ctest --test-dir build --verbose
+
+
+  build_release:
+    name: Build Release
+    runs-on: ubuntu-latest
+    needs:
+      - test_unit
+      - test_unit_memcheck
+      - test_e2e
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: sudo apt update --quiet && sudo apt install --quiet -y libcmocka-dev
+      - name: Configure
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+      - name: Build library
+        run: cmake --build build --target jdwp

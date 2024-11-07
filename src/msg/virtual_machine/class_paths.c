@@ -55,6 +55,7 @@ cleanup:
 
 void class_paths_free(JdwpReply *reply) {
   JdwpVirtualMachineClassPathsData *data = reply->data;
+  free(data->base_dir);
   for (int i = 0; i < data->class_paths; i++)
     free(data->class_paths_data[i]);
   free(data->class_paths_data);
