@@ -36,25 +36,28 @@ void reply_callback(JdwpReply *reply, void **state) {
   assert_int_equal(reply->error, JDWP_ERR_NONE);
 
   if (reply->type == JDWP_VIRTUAL_MACHINE_CLASSES_BY_SIGNATURE) {
+    JdwpVirtualMachineClassesBySignatureData *data = reply->data;
     s->has_ref = 1;
-    s->ref = ((JdwpVirtualMachineClassesBySignatureData *)reply->data)
-                 ->classes_data[0]
-                 .type_id;
+    s->ref = data->classes_data[0].type_id;
     return;
   }
 
   s->should_exit = 1;
-  assert_int_equal(reply->type, JDWP_VIRTUAL_MACHINE_INSTANCE_COUNTS);
+  assert_int_equal(reply->type, JDWP_REFERENCE_TYPE_FIELDS);
+  JdwpReferenceTypeFieldsData *data = reply->data;
+  assert_true(data->declared_data[0].field_id > 0);
+  assert_string_equal(data->declared_data[0].name, "a");
+  assert_string_equal(data->declared_data[0].signature, "I");
+  assert_int_equal(data->declared_data[0].mod_bits, JDWP_FIELD_ACC_PRIVATE);
 
-  JdwpVirtualMachineInstanceCountsData *data = reply->data;
-
-  assert_true(data->counts > 0);
-  for (int i = 0; i < data->counts; i++)
-    assert_true(data->instance_count_data[i] > 0);
+  assert_true(data->declared_data[1].field_id > 0);
+  assert_string_equal(data->declared_data[1].name, "b");
+  assert_string_equal(data->declared_data[1].signature, "Ljava/lang/String;");
+  assert_int_equal(data->declared_data[1].mod_bits,
+                   JDWP_CLASS_ACC_PUBLIC | JDWP_FIELD_ACC_STATIC);
 
   jdwp_reply_free(&reply);
 }
-
 static void test(void **state) {
   JdwpClient client;
   JdwpLibError err = jdwp_client_new(&client);
@@ -66,26 +69,20 @@ static void test(void **state) {
   err = jdwp_client_connect(client, "127.0.0.1", 8000);
   assert_int_equal(err, JDWP_LIB_ERR_NONE);
 
-  // Find our class
+  uint32_t id;
+
+  // Get reference for testing
   JdwpVirtualMachineClassesBySignatureCommand c_cmd = {.signature =
                                                            "LAnotherClass;"};
-
-  uint32_t id;
-  jdwp_client_send(client, &id, JDWP_VIRTUAL_MACHINE_CLASSES_BY_SIGNATURE,
-                   &c_cmd);
+  err = jdwp_client_send(client, &id, JDWP_VIRTUAL_MACHINE_CLASSES_BY_SIGNATURE,
+                         &c_cmd);
   assert_int_equal(err, JDWP_LIB_ERR_NONE);
 
   while (!((State *)*state)->has_ref) {
   }
 
-  uint64_t ref_id[] = {((State *)*state)->ref};
-  JdwpVirtualMachineInstanceCountsCommand cmd = {
-      .ref_types_count = 1,
-      .ref_types_data = ref_id,
-  };
-
-  err =
-      jdwp_client_send(client, &id, JDWP_VIRTUAL_MACHINE_INSTANCE_COUNTS, &cmd);
+  JdwpReferenceTypeFieldsCommand cmd = {.ref_type = ((State *)*state)->ref};
+  err = jdwp_client_send(client, &id, JDWP_REFERENCE_TYPE_FIELDS, &cmd);
   assert_int_equal(err, JDWP_LIB_ERR_NONE);
 
   while (!((State *)*state)->should_exit) {

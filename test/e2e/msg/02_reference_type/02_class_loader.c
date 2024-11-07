@@ -14,11 +14,14 @@
 
 typedef struct {
   int should_exit;
+  int has_ref;
+  uint64_t ref;
 } State;
 
 static int setup(void **state) {
   *state = malloc(sizeof(State));
   ((State *)*state)->should_exit = 0;
+  ((State *)*state)->has_ref = 0;
   return 0;
 }
 
@@ -29,20 +32,23 @@ static int teardown(void **state) {
 
 void reply_callback(JdwpReply *reply, void **state) {
   State *s = *state;
-  s->should_exit = 1;
 
   assert_int_equal(reply->error, JDWP_ERR_NONE);
-  assert_int_equal(reply->type, JDWP_VIRTUAL_MACHINE_ALL_MODULES);
 
-  JdwpVirtualMachineAllModulesData *data = reply->data;
+  if (reply->type == JDWP_VIRTUAL_MACHINE_CLASSES_BY_SIGNATURE) {
+    JdwpVirtualMachineClassesBySignatureData *data = reply->data;
+    s->has_ref = 1;
+    s->ref = data->classes_data[0].type_id;
+    return;
+  }
 
-  assert_true(data->modules > 0);
-  for (uint32_t idx = 0; idx < data->modules; idx++)
-    assert_true(data->modules_data[idx] > 0);
+  s->should_exit = 1;
+  assert_int_equal(reply->type, JDWP_REFERENCE_TYPE_CLASS_LOADER);
+  JdwpReferenceTypeClassLoaderData *data = reply->data;
+  assert_true(data->class_loader_id == 0); // System class loader
 
   jdwp_reply_free(&reply);
 }
-
 static void test(void **state) {
   JdwpClient client;
   JdwpLibError err = jdwp_client_new(&client);
@@ -54,9 +60,21 @@ static void test(void **state) {
   err = jdwp_client_connect(client, "127.0.0.1", 8000);
   assert_int_equal(err, JDWP_LIB_ERR_NONE);
 
-  JdwpVirtualMachineAllModulesCommand cmd = {};
   uint32_t id;
-  err = jdwp_client_send(client, &id, JDWP_VIRTUAL_MACHINE_ALL_MODULES, &cmd);
+
+  // Get reference for testing
+  JdwpVirtualMachineClassesBySignatureCommand c_cmd = {
+      .signature = "Ljava/lang/String;"};
+  err = jdwp_client_send(client, &id, JDWP_VIRTUAL_MACHINE_CLASSES_BY_SIGNATURE,
+                         &c_cmd);
+  assert_int_equal(err, JDWP_LIB_ERR_NONE);
+
+  while (!((State *)*state)->has_ref) {
+  }
+
+  JdwpReferenceTypeClassLoaderCommand cmd = {.ref_type =
+                                                 ((State *)*state)->ref};
+  err = jdwp_client_send(client, &id, JDWP_REFERENCE_TYPE_CLASS_LOADER, &cmd);
   assert_int_equal(err, JDWP_LIB_ERR_NONE);
 
   while (!((State *)*state)->should_exit) {

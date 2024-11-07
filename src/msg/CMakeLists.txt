@@ -5,3 +5,4 @@ target_sources(jdwp PRIVATE
 )
 
 add_subdirectory(virtual_machine)
+add_subdirectory(reference_type)

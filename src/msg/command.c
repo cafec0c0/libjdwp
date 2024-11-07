@@ -1,5 +1,6 @@
 #include "command.h"
 
+#include "reference_type/reference_type.h"
 #include "virtual_machine/virtual_machine.h"
 
 JdwpLibError command_serialize(uint8_t **buf, size_t *len, void *command,
@@ -12,6 +13,8 @@ JdwpLibError command_serialize(uint8_t **buf, size_t *len, void *command,
   switch (type & 0xFF00) {
   case 0x0100:
     return vm_command_serialize(buf, len, command, type, id_sizes, id);
+  case 0x0200:
+    return ref_type_command_serialize(buf, len, command, type, id_sizes, id);
   default:
     return JDWP_LIB_ERR_UNKNOWN_COMMAND_SET;
   }

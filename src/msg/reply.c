@@ -1,5 +1,6 @@
 #include "reply.h"
 
+#include "reference_type/reference_type.h"
 #include "virtual_machine/virtual_machine.h"
 
 #include <stdlib.h>
@@ -27,6 +28,8 @@ JdwpLibError reply_deserialize(JdwpReply **reply, size_t *len, uint8_t *bytes,
   switch (type & 0xFF00) {
   case 0x0100:
     return vm_command_deserialize(reply, len, bytes, type, id_sizes);
+  case 0x200:
+    return ref_type_command_deserialize(reply, len, bytes, type, id_sizes);
   default:
     return JDWP_LIB_ERR_UNKNOWN_COMMAND_SET;
   }
@@ -41,6 +44,8 @@ void jdwp_reply_free(JdwpReply **reply) {
   case 0x0100:
     vm_reply_free(*reply);
     break;
+  case 0x0200:
+    ref_type_reply_free(*reply);
   default:
   }
 
