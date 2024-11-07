@@ -1,0 +1,17 @@
+target_sources(jdwp PRIVATE
+        virtual_machine.c virtual_machine.h
+        version.c version.h
+        classes_by_signature.c classes_by_signature.h
+        all_classes.c all_classes.h
+        all_threads.c all_threads.h
+        top_level_thread_groups.c top_level_thread_groups.h
+        dispose.c dispose.h
+        id_sizes.c id_sizes.h
+        suspend.c suspend.h
+        resume.c resume.h
+        exit.c exit.h
+        create_string.c create_string.h
+        capabilities.c capabilities.h
+        class_paths.c class_paths.h
+        dispose_objects.c dispose_objects.h
+)
