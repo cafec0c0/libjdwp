@@ -1,9 +1,9 @@
-#include "all_threads.h"
+#include "hold_events.h"
 
 #include <stdlib.h>
 #include <string.h>
 
-JdwpLibError all_threads_serialize(uint8_t **buf, size_t *len, void *command,
+JdwpLibError hold_events_serialize(uint8_t **buf, size_t *len, void *command,
                                    JdwpCommandType type, IdSizes *id_sizes,
                                    uint32_t id) {
   uint8_t *buffer = malloc(11);
@@ -19,10 +19,10 @@ JdwpLibError all_threads_serialize(uint8_t **buf, size_t *len, void *command,
   return JDWP_LIB_ERR_NONE;
 }
 
-JdwpLibError all_threads_deserialize(JdwpReply **reply, size_t *len,
+JdwpLibError hold_events_deserialize(JdwpReply **reply, size_t *len,
                                      uint8_t *bytes, JdwpCommandType type,
                                      IdSizes *id_sizes) {
-  REPLY_NEW(rep, JdwpVirtualMachineAllThreadsData)
+  REPLY_NEW(rep, JdwpVirtualMachineHoldEventsData)
 
   ReplyHeader header;
   reply_read_header(&header, bytes);
@@ -32,17 +32,6 @@ JdwpLibError all_threads_deserialize(JdwpReply **reply, size_t *len,
   if (header.error) {
     free(data);
     rep->data = NULL;
-    goto cleanup;
-  }
-
-  uint8_t *ptr = bytes + 11;
-  data->threads = serde_read_uint32_adv(&ptr);
-  data->threads_data =
-      calloc(data->threads, sizeof(JdwpVirtualMachineAllThreadsThread));
-
-  for (int i = 0; i < data->threads; i++) {
-    data->threads_data[i].thread =
-        serde_read_variable_adv(&ptr, id_sizes->object_id_size);
   }
 
 cleanup:
@@ -51,9 +40,8 @@ cleanup:
   return JDWP_LIB_ERR_NONE;
 }
 
-void all_threads_free(JdwpReply *reply) {
-  JdwpVirtualMachineAllThreadsData *data = reply->data;
-  free(data->threads_data);
+void hold_events_free(JdwpReply *reply) {
+  JdwpVirtualMachineHoldEventsData *data = reply->data;
   free(data);
   free(reply);
 }

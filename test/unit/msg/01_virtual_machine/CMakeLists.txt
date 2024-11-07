@@ -13,6 +13,14 @@ set(VIRTUAL_MACHINE_UNIT_TEST_SOURCES
         12_capabilities.c
         13_class_paths.c
         14_dispose_objects.c
+        15_hold_events.c
+        16_release_events.c
+        17_capabilities_new.c
+        18_redefine_classes.c
+        19_set_default_stratum.c
+        20_all_classes_with_generic.c
+        21_instance_counts.c
+        22_all_modules.c
 )
 
 set(VIRTUAL_MACHINE_UNIT_TEST_PREFIX "unit_test_virtual_machine_01")

@@ -11,7 +11,7 @@ JdwpLibError exit_serialize(uint8_t **buf, size_t *len, void *command,
 
   uint8_t *buffer = malloc(11 + 4);
 
-  if (!buf)
+  if (!buffer)
     return JDWP_LIB_ERR_MALLOC;
 
   command_write_header(buffer, 11 + 4, type, id);

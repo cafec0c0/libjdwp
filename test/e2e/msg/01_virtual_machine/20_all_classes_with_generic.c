@@ -1,3 +1,4 @@
+#include <regex.h>
 #include <setjmp.h>
 #include <stdarg.h>
 #include <stddef.h>
@@ -31,17 +32,18 @@ void reply_callback(JdwpReply *reply, void **state) {
   s->should_exit = 1;
 
   assert_int_equal(reply->error, JDWP_ERR_NONE);
-  assert_int_equal(reply->type, JDWP_VIRTUAL_MACHINE_CAPABILITIES);
+  assert_int_equal(reply->type, JDWP_VIRTUAL_MACHINE_ALL_CLASSES_WITH_GENERIC);
 
-  JdwpVirtualMachineCapabilitiesData *data = reply->data;
+  JdwpVirtualMachineAllClassesWithGenericData *data = reply->data;
 
-  assert_in_range(data->can_watch_field_modification, 0, 1);
-  assert_in_range(data->can_watch_field_access, 0, 1);
-  assert_in_range(data->can_get_bytecodes, 0, 1);
-  assert_in_range(data->can_get_synthetic_attribute, 0, 1);
-  assert_in_range(data->can_get_owned_monitor_info, 0, 1);
-  assert_in_range(data->can_get_current_contended_monitor, 0, 1);
-  assert_in_range(data->can_get_monitor_info, 0, 1);
+  assert_true(data->classes > 0);
+  assert_int_equal(data->classes_data[0].ref_type_tag, JDWP_TYPE_TAG_CLASS);
+  assert_true(data->classes_data[0].type_id >= 1);
+  assert_non_null(data->classes_data[0].signature);
+  assert_non_null(data->classes_data[0].generic_signature);
+  assert_int_equal(data->classes_data[0].status,
+                   JDWP_CLASS_STATUS_VERIFIED | JDWP_CLASS_STATUS_PREPARED |
+                       JDWP_CLASS_STATUS_INITIALIZED);
 
   jdwp_reply_free(&reply);
 }
@@ -57,9 +59,10 @@ static void test(void **state) {
   err = jdwp_client_connect(client, "127.0.0.1", 8000);
   assert_int_equal(err, JDWP_LIB_ERR_NONE);
 
-  JdwpVirtualMachineCapabilitiesCommand cmd;
+  JdwpVirtualMachineAllClassesWithGenericCommand cmd = {};
   uint32_t id;
-  err = jdwp_client_send(client, &id, JDWP_VIRTUAL_MACHINE_CAPABILITIES, &cmd);
+  err = jdwp_client_send(client, &id,
+                         JDWP_VIRTUAL_MACHINE_ALL_CLASSES_WITH_GENERIC, &cmd);
   assert_int_equal(err, JDWP_LIB_ERR_NONE);
 
   while (!((State *)*state)->should_exit) {

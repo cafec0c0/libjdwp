@@ -12,7 +12,7 @@ JdwpLibError create_string_serialize(uint8_t **buf, size_t *len, void *command,
   size_t utf_len = strlen(cmd->utf);
   uint8_t *buffer = malloc(11 + 4 + utf_len);
 
-  if (!buf)
+  if (!buffer)
     return JDWP_LIB_ERR_MALLOC;
 
   command_write_header(buffer, 11 + 4 + utf_len, type, id);

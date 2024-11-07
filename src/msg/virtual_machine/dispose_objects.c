@@ -17,7 +17,7 @@ JdwpLibError dispose_objects_serialize(uint8_t **buf, size_t *len,
 
   uint8_t *buffer = malloc(length);
 
-  if (!buf)
+  if (!buffer)
     return JDWP_LIB_ERR_MALLOC;
 
   command_write_header(buffer, length, type, id);

@@ -1,7 +1,10 @@
 # Create JAR
 find_package(Java)
 include(UseJava)
-add_jar(simple-server SimpleServer.java ENTRY_POINT SimpleServer)
+add_jar(simple-server
+        SOURCES SimpleServer.java AnotherClass.java
+        ENTRY_POINT SimpleServer
+)
 
 # Scripts for starting and stopping the JVM
 configure_file(start-server.sh ${CMAKE_CURRENT_BINARY_DIR}/start-server.sh)

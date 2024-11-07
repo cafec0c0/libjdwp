@@ -1,18 +1,24 @@
 #include "all_classes.h"
+#include "all_classes_with_generic.h"
+#include "all_modules.h"
 #include "all_threads.h"
 #include "capabilities.h"
+#include "capabilities_new.h"
 #include "class_paths.h"
 #include "classes_by_signature.h"
 #include "create_string.h"
 #include "dispose.h"
 #include "dispose_objects.h"
 #include "exit.h"
+#include "hold_events.h"
 #include "id_sizes.h"
-#include "msg/command.h"
+#include "instance_counts.h"
+#include "redefine_classes.h"
+#include "release_events.h"
 #include "resume.h"
+#include "set_default_stratum.h"
 #include "suspend.h"
 #include "top_level_thread_groups.h"
-
 #include "version.h"
 
 #include <jdwp.h>
@@ -51,6 +57,23 @@ JdwpLibError vm_command_serialize(uint8_t **buf, size_t *len, void *command,
     return class_paths_serialize(buf, len, command, type, id_sizes, id);
   case JDWP_VIRTUAL_MACHINE_DISPOSE_OBJECTS:
     return dispose_objects_serialize(buf, len, command, type, id_sizes, id);
+  case JDWP_VIRTUAL_MACHINE_HOLD_EVENTS:
+    return hold_events_serialize(buf, len, command, type, id_sizes, id);
+  case JDWP_VIRTUAL_MACHINE_RELEASE_EVENTS:
+    return release_events_serialize(buf, len, command, type, id_sizes, id);
+  case JDWP_VIRTUAL_MACHINE_CAPABILITIES_NEW:
+    return capabilities_new_serialize(buf, len, command, type, id_sizes, id);
+  case JDWP_VIRTUAL_MACHINE_REDEFINE_CLASSES:
+    return redefine_classes_serialize(buf, len, command, type, id_sizes, id);
+  case JDWP_VIRTUAL_MACHINE_SET_DEFAULT_STRATUM:
+    return set_default_stratum_serialize(buf, len, command, type, id_sizes, id);
+  case JDWP_VIRTUAL_MACHINE_ALL_CLASSES_WITH_GENERIC:
+    return all_classes_with_generic_serialize(buf, len, command, type, id_sizes,
+                                              id);
+  case JDWP_VIRTUAL_MACHINE_INSTANCE_COUNTS:
+    return instance_counts_serialize(buf, len, command, type, id_sizes, id);
+  case JDWP_VIRTUAL_MACHINE_ALL_MODULES:
+    return all_modules_serialize(buf, len, command, type, id_sizes, id);
   default:
     return JDWP_LIB_ERR_UNKNOWN_COMMAND;
   }
@@ -89,6 +112,23 @@ JdwpLibError vm_command_deserialize(JdwpReply **reply, size_t *len,
     return class_paths_deserialize(reply, len, bytes, type, id_sizes);
   case JDWP_VIRTUAL_MACHINE_DISPOSE_OBJECTS:
     return dispose_objects_deserialize(reply, len, bytes, type, id_sizes);
+  case JDWP_VIRTUAL_MACHINE_HOLD_EVENTS:
+    return hold_events_deserialize(reply, len, bytes, type, id_sizes);
+  case JDWP_VIRTUAL_MACHINE_RELEASE_EVENTS:
+    return release_events_deserialize(reply, len, bytes, type, id_sizes);
+  case JDWP_VIRTUAL_MACHINE_CAPABILITIES_NEW:
+    return capabilities_new_deserialize(reply, len, bytes, type, id_sizes);
+  case JDWP_VIRTUAL_MACHINE_REDEFINE_CLASSES:
+    return redefine_classes_deserialize(reply, len, bytes, type, id_sizes);
+  case JDWP_VIRTUAL_MACHINE_SET_DEFAULT_STRATUM:
+    return set_default_stratum_deserialize(reply, len, bytes, type, id_sizes);
+  case JDWP_VIRTUAL_MACHINE_ALL_CLASSES_WITH_GENERIC:
+    return all_classes_with_generic_deserialize(reply, len, bytes, type,
+                                                id_sizes);
+  case JDWP_VIRTUAL_MACHINE_INSTANCE_COUNTS:
+    return instance_counts_deserialize(reply, len, bytes, type, id_sizes);
+  case JDWP_VIRTUAL_MACHINE_ALL_MODULES:
+    return all_modules_deserialize(reply, len, bytes, type, id_sizes);
   default:
     return JDWP_LIB_ERR_UNKNOWN_COMMAND;
   }
@@ -137,6 +177,31 @@ void vm_reply_free(JdwpReply *reply) {
     break;
   case JDWP_VIRTUAL_MACHINE_DISPOSE_OBJECTS:
     dispose_objects_free(reply);
+    break;
+  case JDWP_VIRTUAL_MACHINE_HOLD_EVENTS:
+    hold_events_free(reply);
+    break;
+  case JDWP_VIRTUAL_MACHINE_RELEASE_EVENTS:
+    release_events_free(reply);
+    break;
+  case JDWP_VIRTUAL_MACHINE_CAPABILITIES_NEW:
+    capabilities_new_free(reply);
+    break;
+  case JDWP_VIRTUAL_MACHINE_REDEFINE_CLASSES:
+    redefine_classes_free(reply);
+    break;
+  case JDWP_VIRTUAL_MACHINE_SET_DEFAULT_STRATUM:
+    set_default_stratum_free(reply);
+    break;
+  case JDWP_VIRTUAL_MACHINE_ALL_CLASSES_WITH_GENERIC:
+    all_classes_with_generic_free(reply);
+    break;
+  case JDWP_VIRTUAL_MACHINE_INSTANCE_COUNTS:
+    instance_counts_free(reply);
+    break;
+  case JDWP_VIRTUAL_MACHINE_ALL_MODULES:
+    all_modules_free(reply);
+    break;
   default:;
   }
 }

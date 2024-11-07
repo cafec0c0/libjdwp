@@ -14,4 +14,12 @@ target_sources(jdwp PRIVATE
         capabilities.c capabilities.h
         class_paths.c class_paths.h
         dispose_objects.c dispose_objects.h
+        hold_events.c hold_events.h
+        release_events.c release_events.h
+        capabilities_new.c capabilities_new.h
+        redefine_classes.c redefine_classes.h
+        set_default_stratum.c set_default_stratum.h
+        all_classes_with_generic.c all_classes_with_generic.h
+        instance_counts.c instance_counts.h
+        all_modules.c all_modules.h
 )

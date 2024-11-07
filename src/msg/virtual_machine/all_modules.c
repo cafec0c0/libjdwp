@@ -1,9 +1,9 @@
-#include "all_classes.h"
+#include "all_modules.h"
 
 #include <stdlib.h>
 #include <string.h>
 
-JdwpLibError all_classes_serialize(uint8_t **buf, size_t *len, void *command,
+JdwpLibError all_modules_serialize(uint8_t **buf, size_t *len, void *command,
                                    JdwpCommandType type, IdSizes *id_sizes,
                                    uint32_t id) {
   uint8_t *buffer = malloc(11);
@@ -19,10 +19,10 @@ JdwpLibError all_classes_serialize(uint8_t **buf, size_t *len, void *command,
   return JDWP_LIB_ERR_NONE;
 }
 
-JdwpLibError all_classes_deserialize(JdwpReply **reply, size_t *len,
+JdwpLibError all_modules_deserialize(JdwpReply **reply, size_t *len,
                                      uint8_t *bytes, JdwpCommandType type,
                                      IdSizes *id_sizes) {
-  REPLY_NEW(rep, JdwpVirtualMachineAllClassesData)
+  REPLY_NEW(rep, JdwpVirtualMachineAllModulesData)
 
   ReplyHeader header;
   reply_read_header(&header, bytes);
@@ -36,16 +36,12 @@ JdwpLibError all_classes_deserialize(JdwpReply **reply, size_t *len,
   }
 
   uint8_t *ptr = bytes + 11;
-  data->classes = serde_read_uint32_adv(&ptr);
-  data->classes_data =
-      calloc(data->classes, sizeof(JdwpVirtualMachineAllClassesClassData));
+  data->modules = serde_read_uint32_adv(&ptr);
+  data->modules_data = calloc(data->modules, sizeof(uint64_t));
 
-  for (int i = 0; i < data->classes; i++) {
-    data->classes_data[i].ref_type_tag = serde_read_uint8_adv(&ptr);
-    data->classes_data[i].type_id =
+  for (int i = 0; i < data->modules; i++) {
+    data->modules_data[i] =
         serde_read_variable_adv(&ptr, id_sizes->object_id_size);
-    data->classes_data[i].signature = serde_read_string_adv(&ptr);
-    data->classes_data[i].status = serde_read_uint32_adv(&ptr);
   }
 
 cleanup:
@@ -54,11 +50,9 @@ cleanup:
   return JDWP_LIB_ERR_NONE;
 }
 
-void all_classes_free(JdwpReply *reply) {
-  JdwpVirtualMachineAllClassesData *data = reply->data;
-  for (uint32_t i = 0; i < data->classes; i++)
-    free(data->classes_data[i].signature);
-  free(data->classes_data);
+void all_modules_free(JdwpReply *reply) {
+  JdwpVirtualMachineAllModulesData *data = reply->data;
+  free(data->modules_data);
   free(data);
   free(reply);
 }
