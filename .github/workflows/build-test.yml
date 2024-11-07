@@ -68,9 +68,9 @@ jobs:
           java-version: '23'
       - name: Install test and runtime dependencies
         run: sudo apt update --quiet && sudo apt install --quiet -y libcmocka-dev
-      - name: Configure unit tests
-        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DJDWP_E2E_TEST=1 -DJDWP_ENABLE_FIXTURES=1 -DJDWP_GITHUB_PIPELINE=1
-      - name: Build unit tests
+      - name: Configure E2E tests
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DJDWP_E2E_TEST=1 -DJDWP_ENABLE_FIXTURES=1
+      - name: Build E2E tests
         run: cmake --build build
       - name: Run unit tests with memcheck
         run: ctest --test-dir build --verbose
