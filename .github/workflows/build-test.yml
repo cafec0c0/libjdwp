@@ -62,14 +62,12 @@ jobs:
     needs: build_debug
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '23'
       - name: Install test and runtime dependencies
-        run: sudo apt update --quiet && sudo apt install --quiet -y libcmocka-dev wget apt-transport-https gpg
-      - name: Prepare Adoptium 23 JDK installation
-        run: >
-          wget -qO - https://packages.adoptium.net/artifactory/api/gpg/key/public | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/adoptium.gpg > /dev/null &&
-          echo "deb https://packages.adoptium.net/artifactory/deb $(awk -F= '/^VERSION_CODENAME/{print$2}' /etc/os-release) main" | sudo tee /etc/apt/sources.list.d/adoptium.list &&
-          sudo apt update &&
-          sudo apt install --quiet -y temurin-23-jdk
+        run: sudo apt update --quiet && sudo apt install --quiet -y libcmocka-dev
       - name: Configure unit tests
         run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DJDWP_E2E_TEST=1 -DJDWP_ENABLE_FIXTURES=1 -DJDWP_GITHUB_PIPELINE=1
       - name: Build unit tests
