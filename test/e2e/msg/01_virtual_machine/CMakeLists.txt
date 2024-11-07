@@ -8,6 +8,7 @@ set(VIRTUAL_MACHINE_E2E_TEST_SOURCES
         07_id_sizes.c
         08_suspend.c
         09_resume.c
+        # 10_exit.c  (This will kill the VM, causing subsequent tests to fail)
         11_create_string.c
         12_capabilities.c
         13_class_paths.c
@@ -20,9 +21,6 @@ set(VIRTUAL_MACHINE_E2E_TEST_SOURCES
         20_all_classes_with_generic.c
         21_instance_counts.c
         22_modules.c
-
-        # This must be run last as it kills the VM
-        10_exit.c
 )
 
 set(VIRTUAL_MACHINE_E2E_TEST_PREFIX "e2e_test_virtual_machine_01")
