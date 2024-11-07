@@ -32,7 +32,7 @@ foreach (file ${VIRTUAL_MACHINE_E2E_TEST_SOURCES})
     set(EXE_NAME "${VIRTUAL_MACHINE_E2E_TEST_PREFIX}_${STRIPPED_FILE}")
     add_executable(${EXE_NAME} ${file})
     target_include_directories(${EXE_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/test/e2e/)
-    target_link_libraries(${EXE_NAME} PRIVATE cmocka jdwp)
+    target_link_libraries(${EXE_NAME} PRIVATE cmocka jdwp util)
     add_test(NAME ${EXE_NAME} COMMAND ${EXE_NAME})
 
     if (JDWP_ENABLE_FIXTURES)

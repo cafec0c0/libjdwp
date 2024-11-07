@@ -9,6 +9,7 @@
 #include <stdio.h>
 
 #include "jdwp.h"
+#include "util/delay.h"
 
 #include <string.h>
 
@@ -69,6 +70,7 @@ static void test(void **state) {
 }
 
 int main(void) {
+  delay();
   const struct CMUnitTest tests[] = {
       cmocka_unit_test_setup_teardown(test, setup, teardown)};
 

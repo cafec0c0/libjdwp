@@ -3,4 +3,5 @@ if (JDWP_ENABLE_FIXTURES)
     add_subdirectory(fixtures)
 endif ()
 
+add_subdirectory(util)
 add_subdirectory(msg)
