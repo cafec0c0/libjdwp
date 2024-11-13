@@ -10,9 +10,7 @@
 JdwpLibError instance_counts_serialize(uint8_t **buf, size_t *len,
                                        void *command, JdwpCommandType type,
                                        IdSizes *id_sizes, uint32_t id);
-JdwpLibError instance_counts_deserialize(JdwpReply **reply, size_t *len,
-                                         uint8_t *bytes, JdwpCommandType type,
-                                         IdSizes *id_sizes);
+JdwpLibError instance_counts_deserialize(DeserializationContext *ctx);
 void instance_counts_free(JdwpReply *reply);
 
 #endif // INSTANCE_COUNTS_H

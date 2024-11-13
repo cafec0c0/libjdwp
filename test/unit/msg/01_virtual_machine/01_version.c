@@ -35,9 +35,12 @@ static void test_version_deserialize(void **state) {
       "K 64-Bit Server VM";
 
   JdwpReply *reply;
-  size_t len;
-  JdwpLibError e = version_deserialize(&reply, &len, vm_reply,
-                                       JDWP_VIRTUAL_MACHINE_VERSION, NULL);
+  DeserializationContext ctx = {
+      .reply = &reply,
+      .bytes = vm_reply,
+      .type = JDWP_VIRTUAL_MACHINE_VERSION,
+  };
+  JdwpLibError e = version_deserialize(&ctx);
 
   assert_int_equal(e, JDWP_LIB_ERR_NONE);
   assert_non_null(reply);

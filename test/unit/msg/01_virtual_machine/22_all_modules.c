@@ -35,9 +35,13 @@ static void test_all_modules_deserialize(void **state) {
       "\000\000\000\000\000\003\000\000\000\000\000\000\000\004";
 
   JdwpReply *reply;
-  size_t len;
-  JdwpLibError e = all_modules_deserialize(
-      &reply, &len, vm_reply, JDWP_VIRTUAL_MACHINE_ALL_MODULES, &id_sizes);
+  DeserializationContext ctx = {
+      .reply = &reply,
+      .bytes = vm_reply,
+      .type = JDWP_VIRTUAL_MACHINE_ALL_MODULES,
+      .id_sizes = &id_sizes,
+  };
+  JdwpLibError e = all_modules_deserialize(&ctx);
 
   assert_int_equal(e, JDWP_LIB_ERR_NONE);
   assert_non_null(reply);

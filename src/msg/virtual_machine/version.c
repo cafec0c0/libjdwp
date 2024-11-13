@@ -17,14 +17,13 @@ JdwpLibError version_serialize(uint8_t **buf, size_t *len, void *command,
   return JDWP_LIB_ERR_NONE;
 }
 
-JdwpLibError version_deserialize(JdwpReply **reply, size_t *len, uint8_t *bytes,
-                                 JdwpCommandType type, IdSizes *id_sizes) {
+JdwpLibError version_deserialize(DeserializationContext *ctx) {
   REPLY_NEW(rep, JdwpVirtualMachineVersionData)
 
   ReplyHeader header;
-  reply_read_header(&header, bytes);
+  reply_read_header(&header, ctx->bytes);
 
-  REPLY_POPULATE(rep, header.error, header.id, type)
+  REPLY_POPULATE(rep, header.error, header.id, ctx->type)
 
   if (header.error) {
     free(data);
@@ -32,7 +31,7 @@ JdwpLibError version_deserialize(JdwpReply **reply, size_t *len, uint8_t *bytes,
     goto cleanup;
   }
 
-  uint8_t *ptr = bytes + 11;
+  uint8_t *ptr = ctx->bytes + 11;
   data->description = serde_read_string_adv(&ptr);
   data->jdwp_major = serde_read_uint32_adv(&ptr);
   data->jdwp_minor = serde_read_uint32_adv(&ptr);
@@ -40,7 +39,7 @@ JdwpLibError version_deserialize(JdwpReply **reply, size_t *len, uint8_t *bytes,
   data->vm_name = serde_read_string_adv(&ptr);
 
 cleanup:
-  *reply = rep;
+  *ctx->reply = rep;
 
   return JDWP_LIB_ERR_NONE;
 }

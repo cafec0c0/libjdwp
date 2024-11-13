@@ -36,9 +36,13 @@ static void test_fields_deserialize(void **state) {
       "String;\000\000\000\t";
 
   JdwpReply *reply;
-  size_t len;
-  JdwpLibError e = ref_type_fields_deserialize(
-      &reply, &len, vm_reply, JDWP_REFERENCE_TYPE_FIELDS, &id_sizes);
+  DeserializationContext ctx = {
+      .reply = &reply,
+      .bytes = vm_reply,
+      .type = JDWP_REFERENCE_TYPE_FIELDS,
+      .id_sizes = &id_sizes,
+  };
+  JdwpLibError e = ref_type_fields_deserialize(&ctx);
 
   assert_int_equal(e, JDWP_LIB_ERR_NONE);
   assert_non_null(reply);

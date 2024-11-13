@@ -33,9 +33,13 @@ static void test_create_string_deserialize(void **state) {
                        "\000\000\000\000\000\001";
 
   JdwpReply *reply;
-  size_t len;
-  JdwpLibError e = create_string_deserialize(
-      &reply, &len, vm_reply, JDWP_VIRTUAL_MACHINE_CREATE_STRING, &id_sizes);
+  DeserializationContext ctx = {
+      .reply = &reply,
+      .bytes = vm_reply,
+      .type = JDWP_VIRTUAL_MACHINE_CREATE_STRING,
+      .id_sizes = &id_sizes,
+  };
+  JdwpLibError e = create_string_deserialize(&ctx);
 
   assert_int_equal(e, JDWP_LIB_ERR_NONE);
   assert_non_null(reply);

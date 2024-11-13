@@ -25,15 +25,13 @@ JdwpLibError create_string_serialize(uint8_t **buf, size_t *len, void *command,
   return JDWP_LIB_ERR_NONE;
 }
 
-JdwpLibError create_string_deserialize(JdwpReply **reply, size_t *len,
-                                       uint8_t *bytes, JdwpCommandType type,
-                                       IdSizes *id_sizes) {
+JdwpLibError create_string_deserialize(DeserializationContext *ctx) {
   REPLY_NEW(rep, JdwpVirtualMachineCreateStringData)
 
   ReplyHeader header;
-  reply_read_header(&header, bytes);
+  reply_read_header(&header, ctx->bytes);
 
-  REPLY_POPULATE(rep, header.error, header.id, type)
+  REPLY_POPULATE(rep, header.error, header.id, ctx->type)
 
   if (header.error) {
     free(data);
@@ -42,10 +40,10 @@ JdwpLibError create_string_deserialize(JdwpReply **reply, size_t *len,
   }
 
   data->string_object =
-      serde_read_variable(bytes + 11, id_sizes->object_id_size);
+      serde_read_variable(ctx->bytes + 11, ctx->id_sizes->object_id_size);
 
 cleanup:
-  *reply = rep;
+  *ctx->reply = rep;
 
   return JDWP_LIB_ERR_NONE;
 }

@@ -4,6 +4,7 @@ set(REFERENCE_TYPE_E2E_TEST_SOURCES
         03_modifiers.c
         04_fields.c
         05_methods.c
+        06_get_values.c
 )
 
 set(REFERENCE_TYPE_E2E_TEST_PREFIX "e2e_test_reference_type_02")

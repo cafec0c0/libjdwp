@@ -3,6 +3,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // Command types are represented using their command set and command.
 // (command set) (command)
 //            v   v
@@ -114,6 +118,14 @@ typedef enum {
   JDWP_METHOD_ACC_SYNTHETIC_HIGH_BIT = 0xf000000,
 } JdwpMethodModifiers;
 
+typedef enum {
+  JDWP_LIB_UINT8,
+  JDWP_LIB_UINT16,
+  JDWP_LIB_UINT32,
+  JDWP_LIB_UINT64,
+  JDWP_LIB_STRING,
+} JdwpLibValueType;
+
 #include "msg/reference_type.h"
 #include "msg/virtual_machine.h"
 
@@ -136,12 +148,16 @@ JdwpLibError jdwp_client_set_callback(JdwpClient *client,
                                       JdwpReplyCallback callback, void **state);
 JdwpLibError jdwp_client_connect(JdwpClient client, const char *hostname,
                                  uint16_t port);
-JdwpLibError jdwp_client_send(JdwpClient client, uint32_t *id,
+JdwpLibError jdwp_client_send(JdwpClient client, uint32_t id,
                               JdwpCommandType type, void *command);
 JdwpLibError jdwp_client_disconnect(JdwpClient client);
 
 void jdwp_reply_free(JdwpReply **reply);
 
 void jdwp_client_free(JdwpClient *client);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // JDWP_H

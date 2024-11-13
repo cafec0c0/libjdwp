@@ -72,7 +72,8 @@ static CommandAttr *find_in_buffer(CommandAttr *command_attr_buffer, size_t len,
 }
 
 static ssize_t insert_into_buffer(CommandAttr *command_attr_buffer, size_t len,
-                                  uint32_t id, JdwpCommandType type) {
+                                  uint32_t id, JdwpCommandType type,
+                                  void *command) {
   if (!command_attr_buffer)
     return -1;
 
@@ -147,8 +148,15 @@ void *client_listen(void *context) {
 
     JdwpReply *reply;
     size_t len;
-    if (reply_deserialize(&reply, &len, buf, attr->type, ctx->id_sizes) !=
-        JDWP_LIB_ERR_NONE) {
+    DeserializationContext data = {
+        .reply = &reply,
+        .len = &len,
+        .bytes = buf,
+        .type = attr->type,
+        .id_sizes = ctx->id_sizes,
+    };
+
+    if (reply_deserialize(&data) != JDWP_LIB_ERR_NONE) {
       free(buf);
       remove_from_buffer(ctx->command_attr_buffer,
                          *ctx->command_attr_buffer_len, attr->id);
@@ -231,8 +239,14 @@ static JdwpLibError init_id_sizes(IdSizes **id_sizes, int sockfd, uint32_t id) {
     return JDWP_LIB_ERR_NATIVE;
 
   JdwpReply *reply;
-  err = id_sizes_deserialize(&reply, NULL, in_buf,
-                             JDWP_VIRTUAL_MACHINE_ID_SIZES, NULL);
+  DeserializationContext ctx = {
+      .reply = &reply,
+      .len = NULL,
+      .bytes = in_buf,
+      .type = JDWP_VIRTUAL_MACHINE_ID_SIZES,
+      .id_sizes = NULL,
+  };
+  err = id_sizes_deserialize(&ctx);
   if (err)
     return err;
 
@@ -308,7 +322,7 @@ JdwpLibError jdwp_client_connect(JdwpClient client, const char *hostname,
   return JDWP_LIB_ERR_NONE;
 }
 
-JdwpLibError jdwp_client_send(JdwpClient client, uint32_t *id,
+JdwpLibError jdwp_client_send(JdwpClient client, uint32_t id,
                               JdwpCommandType type, void *command) {
   if (!client || !command)
     return JDWP_LIB_ERR_NULL_POINTER;
@@ -318,20 +332,16 @@ JdwpLibError jdwp_client_send(JdwpClient client, uint32_t *id,
   JdwpLibError err;
   pthread_mutex_lock(&c->write_mutex); // Enter critical
 
-  uint32_t this_id = c->next_id++;
-  if (id)
-    *id = this_id;
-
   // try to insert into buffer
-  if (insert_into_buffer(c->command_attr_buffer, c->command_attr_buffer_len,
-                         this_id, type) == -1) {
+  if (insert_into_buffer(c->command_attr_buffer, c->command_attr_buffer_len, id,
+                         type, command) == -1) {
     err = JDWP_LIB_ERR_COMMAND_BUFFER_FULL;
     goto cleanup;
   }
 
   uint8_t *buf = NULL;
   size_t len;
-  err = command_serialize(&buf, &len, command, type, c->ctx->id_sizes, this_id);
+  err = command_serialize(&buf, &len, command, type, c->ctx->id_sizes, id);
   if (err)
     goto cleanup;
 

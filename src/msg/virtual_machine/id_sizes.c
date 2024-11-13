@@ -17,15 +17,13 @@ JdwpLibError id_sizes_serialize(uint8_t **buf, size_t *len, void *command,
   return JDWP_LIB_ERR_NONE;
 }
 
-JdwpLibError id_sizes_deserialize(JdwpReply **reply, size_t *len,
-                                  uint8_t *bytes, JdwpCommandType type,
-                                  IdSizes *id_sizes) {
+JdwpLibError id_sizes_deserialize(DeserializationContext *ctx) {
   REPLY_NEW(rep, JdwpVirtualMachineIdSizesData)
 
   ReplyHeader header;
-  reply_read_header(&header, bytes);
+  reply_read_header(&header, ctx->bytes);
 
-  REPLY_POPULATE(rep, header.error, header.id, type)
+  REPLY_POPULATE(rep, header.error, header.id, ctx->type)
 
   if (header.error) {
     free(data);
@@ -33,7 +31,7 @@ JdwpLibError id_sizes_deserialize(JdwpReply **reply, size_t *len,
     goto cleanup;
   }
 
-  uint8_t *ptr = bytes + 11;
+  uint8_t *ptr = ctx->bytes + 11;
   data->field_id_size = serde_read_uint32_adv(&ptr);
   data->method_id_size = serde_read_uint32_adv(&ptr);
   data->object_id_size = serde_read_uint32_adv(&ptr);
@@ -41,7 +39,7 @@ JdwpLibError id_sizes_deserialize(JdwpReply **reply, size_t *len,
   data->frame_id_size = serde_read_uint32_adv(&ptr);
 
 cleanup:
-  *reply = rep;
+  *ctx->reply = rep;
 
   return JDWP_LIB_ERR_NONE;
 }

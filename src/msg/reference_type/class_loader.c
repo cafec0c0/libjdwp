@@ -26,16 +26,13 @@ JdwpLibError ref_type_class_loader_serialize(uint8_t **buf, size_t *len,
   return JDWP_LIB_ERR_NONE;
 }
 
-JdwpLibError ref_type_class_loader_deserialize(JdwpReply **reply, size_t *len,
-                                               uint8_t *bytes,
-                                               JdwpCommandType type,
-                                               IdSizes *id_sizes) {
+JdwpLibError ref_type_class_loader_deserialize(DeserializationContext *ctx) {
   REPLY_NEW(rep, JdwpReferenceTypeClassLoaderData)
 
   ReplyHeader header;
-  reply_read_header(&header, bytes);
+  reply_read_header(&header, ctx->bytes);
 
-  REPLY_POPULATE(rep, header.error, header.id, type)
+  REPLY_POPULATE(rep, header.error, header.id, ctx->type)
 
   if (header.error) {
     free(data);
@@ -43,11 +40,12 @@ JdwpLibError ref_type_class_loader_deserialize(JdwpReply **reply, size_t *len,
     goto cleanup;
   }
 
-  uint8_t *ptr = bytes + 11;
-  data->class_loader_id = serde_read_variable(ptr, id_sizes->object_id_size);
+  uint8_t *ptr = ctx->bytes + 11;
+  data->class_loader_id =
+      serde_read_variable(ptr, ctx->id_sizes->object_id_size);
 
 cleanup:
-  *reply = rep;
+  *ctx->reply = rep;
 
   return JDWP_LIB_ERR_NONE;
 }

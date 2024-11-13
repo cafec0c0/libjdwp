@@ -7,7 +7,7 @@
 
 typedef struct {
   JdwpCommandType t;
-  JdwpLibError (*f)(ReplyDeserializationRequest *);
+  JdwpLibError (*f)(DeserializationContext *);
 } Deserializer;
 
 typedef struct {
@@ -23,13 +23,12 @@ void reply_read_header(ReplyHeader *header, uint8_t *buf) {
   header->error = serde_read_uint16_adv(&ptr);
 }
 
-JdwpLibError reply_deserialize(JdwpReply **reply, size_t *len, uint8_t *bytes,
-                               JdwpCommandType type, IdSizes *id_sizes) {
-  switch (type & 0xFF00) {
+JdwpLibError reply_deserialize(DeserializationContext *ctx) {
+  switch (ctx->type & 0xFF00) {
   case 0x0100:
-    return vm_command_deserialize(reply, len, bytes, type, id_sizes);
+    return vm_command_deserialize(ctx);
   case 0x200:
-    return ref_type_command_deserialize(reply, len, bytes, type, id_sizes);
+    return ref_type_command_deserialize(ctx);
   default:
     return JDWP_LIB_ERR_UNKNOWN_COMMAND_SET;
   }

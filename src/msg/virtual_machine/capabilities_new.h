@@ -11,9 +11,7 @@ JdwpLibError capabilities_new_serialize(uint8_t **buf, size_t *len,
                                         void *command, JdwpCommandType type,
                                         IdSizes *capabilities_new, uint32_t id);
 
-JdwpLibError capabilities_new_deserialize(JdwpReply **reply, size_t *len,
-                                          uint8_t *bytes, JdwpCommandType type,
-                                          IdSizes *capabilities_new);
+JdwpLibError capabilities_new_deserialize(DeserializationContext *ctx);
 void capabilities_new_free(JdwpReply *reply);
 
 #endif // CAPABILITIES_NEW_H

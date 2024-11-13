@@ -34,9 +34,13 @@ static void test_class_loader_deserialize(void **state) {
                        "\000\000\000\000\000\000";
 
   JdwpReply *reply;
-  size_t len;
-  JdwpLibError e = ref_type_class_loader_deserialize(
-      &reply, &len, vm_reply, JDWP_REFERENCE_TYPE_CLASS_LOADER, &id_sizes);
+  DeserializationContext ctx = {
+      .reply = &reply,
+      .bytes = vm_reply,
+      .type = JDWP_REFERENCE_TYPE_CLASS_LOADER,
+      .id_sizes = &id_sizes,
+  };
+  JdwpLibError e = ref_type_class_loader_deserialize(&ctx);
 
   assert_int_equal(e, JDWP_LIB_ERR_NONE);
   assert_non_null(reply);

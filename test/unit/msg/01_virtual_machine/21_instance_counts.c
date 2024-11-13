@@ -39,9 +39,13 @@ static void test_instance_counts_deserialize(void **state) {
                        "\000\001\000\000\000\000\000\000\000\001";
 
   JdwpReply *reply;
-  size_t len;
-  JdwpLibError e = instance_counts_deserialize(
-      &reply, &len, vm_reply, JDWP_VIRTUAL_MACHINE_INSTANCE_COUNTS, &id_sizes);
+  DeserializationContext ctx = {
+      .reply = &reply,
+      .bytes = vm_reply,
+      .type = JDWP_VIRTUAL_MACHINE_INSTANCE_COUNTS,
+      .id_sizes = &id_sizes,
+  };
+  JdwpLibError e = instance_counts_deserialize(&ctx);
 
   assert_int_equal(e, JDWP_LIB_ERR_NONE);
   assert_non_null(reply);

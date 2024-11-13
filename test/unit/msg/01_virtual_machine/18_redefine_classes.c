@@ -77,9 +77,13 @@ static void test_redefine_classes_deserialize(void **state) {
   uint8_t vm_reply[] = "\000\000\000\v\000\000\000\001\200\000\000";
 
   JdwpReply *reply;
-  size_t len;
-  JdwpLibError e = redefine_classes_deserialize(
-      &reply, &len, vm_reply, JDWP_VIRTUAL_MACHINE_REDEFINE_CLASSES, &id_sizes);
+  DeserializationContext ctx = {
+      .reply = &reply,
+      .bytes = vm_reply,
+      .type = JDWP_VIRTUAL_MACHINE_REDEFINE_CLASSES,
+      .id_sizes = &id_sizes,
+  };
+  JdwpLibError e = redefine_classes_deserialize(&ctx);
 
   assert_int_equal(e, JDWP_LIB_ERR_NONE);
   assert_non_null(reply);

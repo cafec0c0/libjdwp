@@ -19,15 +19,13 @@ JdwpLibError all_threads_serialize(uint8_t **buf, size_t *len, void *command,
   return JDWP_LIB_ERR_NONE;
 }
 
-JdwpLibError all_threads_deserialize(JdwpReply **reply, size_t *len,
-                                     uint8_t *bytes, JdwpCommandType type,
-                                     IdSizes *id_sizes) {
+JdwpLibError all_threads_deserialize(DeserializationContext *ctx) {
   REPLY_NEW(rep, JdwpVirtualMachineAllThreadsData)
 
   ReplyHeader header;
-  reply_read_header(&header, bytes);
+  reply_read_header(&header, ctx->bytes);
 
-  REPLY_POPULATE(rep, header.error, header.id, type)
+  REPLY_POPULATE(rep, header.error, header.id, ctx->type)
 
   if (header.error) {
     free(data);
@@ -35,18 +33,18 @@ JdwpLibError all_threads_deserialize(JdwpReply **reply, size_t *len,
     goto cleanup;
   }
 
-  uint8_t *ptr = bytes + 11;
+  uint8_t *ptr = ctx->bytes + 11;
   data->threads = serde_read_uint32_adv(&ptr);
   data->threads_data =
       calloc(data->threads, sizeof(JdwpVirtualMachineAllThreadsThread));
 
   for (int i = 0; i < data->threads; i++) {
     data->threads_data[i].thread =
-        serde_read_variable_adv(&ptr, id_sizes->object_id_size);
+        serde_read_variable_adv(&ptr, ctx->id_sizes->object_id_size);
   }
 
 cleanup:
-  *reply = rep;
+  *ctx->reply = rep;
 
   return JDWP_LIB_ERR_NONE;
 }

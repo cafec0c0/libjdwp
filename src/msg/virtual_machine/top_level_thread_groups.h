@@ -9,10 +9,7 @@ JdwpLibError top_level_thread_groups_serialize(uint8_t **buf, size_t *len,
                                                JdwpCommandType type,
                                                IdSizes *id_sizes, uint32_t id);
 
-JdwpLibError top_level_thread_groups_deserialize(JdwpReply **reply, size_t *len,
-                                                 uint8_t *bytes,
-                                                 JdwpCommandType type,
-                                                 IdSizes *id_sizes);
+JdwpLibError top_level_thread_groups_deserialize(DeserializationContext *ctx);
 void top_level_thread_groups_free(JdwpReply *reply);
 
 #endif // TOP_LEVEL_THREAD_GROUPS_H

@@ -29,9 +29,12 @@ static void test_release_events_deserialize(void **state) {
   uint8_t vm_reply[] = "\000\000\000\013\000\000\000\001\200\000\000";
 
   JdwpReply *reply;
-  size_t len;
-  JdwpLibError e = release_events_deserialize(
-      &reply, &len, vm_reply, JDWP_VIRTUAL_MACHINE_RELEASE_EVENTS, NULL);
+  DeserializationContext ctx = {
+      .reply = &reply,
+      .bytes = vm_reply,
+      .type = JDWP_VIRTUAL_MACHINE_RELEASE_EVENTS,
+  };
+  JdwpLibError e = release_events_deserialize(&ctx);
 
   assert_int_equal(e, JDWP_LIB_ERR_NONE);
   assert_non_null(reply);

@@ -19,15 +19,13 @@ JdwpLibError all_classes_serialize(uint8_t **buf, size_t *len, void *command,
   return JDWP_LIB_ERR_NONE;
 }
 
-JdwpLibError all_classes_deserialize(JdwpReply **reply, size_t *len,
-                                     uint8_t *bytes, JdwpCommandType type,
-                                     IdSizes *id_sizes) {
+JdwpLibError all_classes_deserialize(DeserializationContext *ctx) {
   REPLY_NEW(rep, JdwpVirtualMachineAllClassesData)
 
   ReplyHeader header;
-  reply_read_header(&header, bytes);
+  reply_read_header(&header, ctx->bytes);
 
-  REPLY_POPULATE(rep, header.error, header.id, type)
+  REPLY_POPULATE(rep, header.error, header.id, ctx->type)
 
   if (header.error) {
     free(data);
@@ -35,7 +33,7 @@ JdwpLibError all_classes_deserialize(JdwpReply **reply, size_t *len,
     goto cleanup;
   }
 
-  uint8_t *ptr = bytes + 11;
+  uint8_t *ptr = ctx->bytes + 11;
   data->classes = serde_read_uint32_adv(&ptr);
   data->classes_data =
       calloc(data->classes, sizeof(JdwpVirtualMachineAllClassesClassData));
@@ -43,13 +41,13 @@ JdwpLibError all_classes_deserialize(JdwpReply **reply, size_t *len,
   for (int i = 0; i < data->classes; i++) {
     data->classes_data[i].ref_type_tag = serde_read_uint8_adv(&ptr);
     data->classes_data[i].type_id =
-        serde_read_variable_adv(&ptr, id_sizes->object_id_size);
+        serde_read_variable_adv(&ptr, ctx->id_sizes->object_id_size);
     data->classes_data[i].signature = serde_read_string_adv(&ptr);
     data->classes_data[i].status = serde_read_uint32_adv(&ptr);
   }
 
 cleanup:
-  *reply = rep;
+  *ctx->reply = rep;
 
   return JDWP_LIB_ERR_NONE;
 }

@@ -25,16 +25,13 @@ JdwpLibError ref_type_signature_serialize(uint8_t **buf, size_t *len,
   return JDWP_LIB_ERR_NONE;
 }
 
-JdwpLibError ref_type_signature_deserialize(JdwpReply **reply, size_t *len,
-                                            uint8_t *bytes,
-                                            JdwpCommandType type,
-                                            IdSizes *id_sizes) {
+JdwpLibError ref_type_signature_deserialize(DeserializationContext *ctx) {
   REPLY_NEW(rep, JdwpReferenceTypeSignatureData)
 
   ReplyHeader header;
-  reply_read_header(&header, bytes);
+  reply_read_header(&header, ctx->bytes);
 
-  REPLY_POPULATE(rep, header.error, header.id, type)
+  REPLY_POPULATE(rep, header.error, header.id, ctx->type)
 
   if (header.error) {
     free(data);
@@ -42,11 +39,11 @@ JdwpLibError ref_type_signature_deserialize(JdwpReply **reply, size_t *len,
     goto cleanup;
   }
 
-  uint8_t *ptr = bytes + 11;
+  uint8_t *ptr = ctx->bytes + 11;
   data->signature = serde_read_string(ptr);
 
 cleanup:
-  *reply = rep;
+  *ctx->reply = rep;
 
   return JDWP_LIB_ERR_NONE;
 }

@@ -11,7 +11,6 @@ JdwpLibError resume_serialize(uint8_t **buf, size_t *len, void *command,
                               JdwpCommandType type, IdSizes *id_sizes,
                               uint32_t id);
 
-JdwpLibError resume_deserialize(JdwpReply **reply, size_t *len, uint8_t *bytes,
-                                JdwpCommandType type, IdSizes *id_sizes);
+JdwpLibError resume_deserialize(DeserializationContext *ctx);
 void resume_free(JdwpReply *reply);
 #endif // RESUME_H

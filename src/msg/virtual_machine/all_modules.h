@@ -11,8 +11,6 @@ JdwpLibError all_modules_serialize(uint8_t **buf, size_t *len, void *command,
                                    JdwpCommandType type, IdSizes *id_sizes,
                                    uint32_t id);
 
-JdwpLibError all_modules_deserialize(JdwpReply **reply, size_t *len,
-                                     uint8_t *bytes, JdwpCommandType type,
-                                     IdSizes *id_sizes);
+JdwpLibError all_modules_deserialize(DeserializationContext *ctx);
 void all_modules_free(JdwpReply *reply);
 #endif // ALL_MODULES_H

@@ -17,15 +17,13 @@ JdwpLibError class_paths_serialize(uint8_t **buf, size_t *len, void *command,
   return JDWP_LIB_ERR_NONE;
 }
 
-JdwpLibError class_paths_deserialize(JdwpReply **reply, size_t *len,
-                                     uint8_t *bytes, JdwpCommandType type,
-                                     IdSizes *id_sizes) {
+JdwpLibError class_paths_deserialize(DeserializationContext *ctx) {
   REPLY_NEW(rep, JdwpVirtualMachineClassPathsData)
 
   ReplyHeader header;
-  reply_read_header(&header, bytes);
+  reply_read_header(&header, ctx->bytes);
 
-  REPLY_POPULATE(rep, header.error, header.id, type)
+  REPLY_POPULATE(rep, header.error, header.id, ctx->type)
 
   if (header.error) {
     free(data);
@@ -33,7 +31,7 @@ JdwpLibError class_paths_deserialize(JdwpReply **reply, size_t *len,
     goto cleanup;
   }
 
-  uint8_t *ptr = bytes + 11;
+  uint8_t *ptr = ctx->bytes + 11;
   data->base_dir = serde_read_string_adv(&ptr);
   data->class_paths = serde_read_uint32_adv(&ptr);
   data->class_paths_data = calloc(data->class_paths, sizeof(char *));
@@ -48,7 +46,7 @@ JdwpLibError class_paths_deserialize(JdwpReply **reply, size_t *len,
   }
 
 cleanup:
-  *reply = rep;
+  *ctx->reply = rep;
 
   return JDWP_LIB_ERR_NONE;
 }

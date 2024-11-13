@@ -36,9 +36,13 @@ static void test_methods_deserialize(void **state) {
       "\000\000\004(I)I\000\000\000\001";
 
   JdwpReply *reply;
-  size_t len;
-  JdwpLibError e = ref_type_methods_deserialize(
-      &reply, &len, vm_reply, JDWP_REFERENCE_TYPE_METHODS, &id_sizes);
+  DeserializationContext ctx = {
+      .reply = &reply,
+      .bytes = vm_reply,
+      .type = JDWP_REFERENCE_TYPE_METHODS,
+      .id_sizes = &id_sizes,
+  };
+  JdwpLibError e = ref_type_methods_deserialize(&ctx);
 
   assert_int_equal(e, JDWP_LIB_ERR_NONE);
   assert_non_null(reply);

@@ -17,15 +17,13 @@ JdwpLibError capabilities_serialize(uint8_t **buf, size_t *len, void *command,
   return JDWP_LIB_ERR_NONE;
 }
 
-JdwpLibError capabilities_deserialize(JdwpReply **reply, size_t *len,
-                                      uint8_t *bytes, JdwpCommandType type,
-                                      IdSizes *id_sizes) {
+JdwpLibError capabilities_deserialize(DeserializationContext *ctx) {
   REPLY_NEW(rep, JdwpVirtualMachineCapabilitiesData)
 
   ReplyHeader header;
-  reply_read_header(&header, bytes);
+  reply_read_header(&header, ctx->bytes);
 
-  REPLY_POPULATE(rep, header.error, header.id, type)
+  REPLY_POPULATE(rep, header.error, header.id, ctx->type)
 
   if (header.error) {
     free(data);
@@ -33,7 +31,7 @@ JdwpLibError capabilities_deserialize(JdwpReply **reply, size_t *len,
     goto cleanup;
   }
 
-  uint8_t *ptr = bytes + 11;
+  uint8_t *ptr = ctx->bytes + 11;
   data->can_watch_field_modification = serde_read_uint8_adv(&ptr);
   data->can_watch_field_access = serde_read_uint8_adv(&ptr);
   data->can_get_bytecodes = serde_read_uint8_adv(&ptr);
@@ -43,7 +41,7 @@ JdwpLibError capabilities_deserialize(JdwpReply **reply, size_t *len,
   data->can_get_monitor_info = serde_read_uint8_adv(&ptr);
 
 cleanup:
-  *reply = rep;
+  *ctx->reply = rep;
 
   return JDWP_LIB_ERR_NONE;
 }

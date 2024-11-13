@@ -5,4 +5,5 @@ target_sources(jdwp PRIVATE
         modifiers.c modifiers.h
         fields.c fields.h
         methods.c methods.h
+        get_values.c get_values.h
 )

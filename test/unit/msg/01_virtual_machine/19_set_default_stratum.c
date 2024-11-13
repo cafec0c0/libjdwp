@@ -33,10 +33,13 @@ static void test_set_default_stratum_deserialize(void **state) {
   uint8_t vm_reply[] = "\000\000\000\v\000\000\000\001\200\000\000";
 
   JdwpReply *reply;
-  size_t len;
-  JdwpLibError e = set_default_stratum_deserialize(
-      &reply, &len, vm_reply, JDWP_VIRTUAL_MACHINE_SET_DEFAULT_STRATUM,
-      &id_sizes);
+  DeserializationContext ctx = {
+      .reply = &reply,
+      .bytes = vm_reply,
+      .type = JDWP_VIRTUAL_MACHINE_SET_DEFAULT_STRATUM,
+      .id_sizes = &id_sizes,
+  };
+  JdwpLibError e = set_default_stratum_deserialize(&ctx);
 
   assert_int_equal(e, JDWP_LIB_ERR_NONE);
   assert_non_null(reply);

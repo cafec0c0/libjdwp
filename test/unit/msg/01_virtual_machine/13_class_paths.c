@@ -31,9 +31,12 @@ static void test_class_paths_deserialize(void **state) {
                        "simple-server.jar\000\000\000\000";
 
   JdwpReply *reply;
-  size_t len;
-  JdwpLibError e = class_paths_deserialize(
-      &reply, &len, vm_reply, JDWP_VIRTUAL_MACHINE_CLASS_PATHS, NULL);
+  DeserializationContext ctx = {
+      .reply = &reply,
+      .bytes = vm_reply,
+      .type = JDWP_VIRTUAL_MACHINE_CLASS_PATHS,
+  };
+  JdwpLibError e = class_paths_deserialize(&ctx);
 
   assert_int_equal(e, JDWP_LIB_ERR_NONE);
   assert_non_null(reply);

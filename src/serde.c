@@ -22,10 +22,7 @@ void serde_write_uint64(uint8_t *buffer, uint64_t value) {
   uint32_t low = value >> 32;
   uint32_t high = value & 0xFFFFFFFFULL;
 
-  if (needs_swap) { // TODO: fix
-    serde_write_uint32(buffer, low);
-    serde_write_uint32(buffer + 4, high);
-  } else {
+  if (needs_swap) {
     serde_write_uint32(buffer, low);
     serde_write_uint32(buffer + 4, high);
   }

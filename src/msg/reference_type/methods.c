@@ -25,15 +25,13 @@ JdwpLibError ref_type_methods_serialize(uint8_t **buf, size_t *len,
   return JDWP_LIB_ERR_NONE;
 }
 
-JdwpLibError ref_type_methods_deserialize(JdwpReply **reply, size_t *len,
-                                          uint8_t *bytes, JdwpCommandType type,
-                                          IdSizes *id_sizes) {
+JdwpLibError ref_type_methods_deserialize(DeserializationContext *ctx) {
   REPLY_NEW(rep, JdwpReferenceTypeMethodsData)
 
   ReplyHeader header;
-  reply_read_header(&header, bytes);
+  reply_read_header(&header, ctx->bytes);
 
-  REPLY_POPULATE(rep, header.error, header.id, type)
+  REPLY_POPULATE(rep, header.error, header.id, ctx->type)
 
   if (header.error) {
     free(data);
@@ -41,21 +39,21 @@ JdwpLibError ref_type_methods_deserialize(JdwpReply **reply, size_t *len,
     goto cleanup;
   }
 
-  uint8_t *ptr = bytes + 11;
+  uint8_t *ptr = ctx->bytes + 11;
   data->declared = serde_read_uint32_adv(&ptr);
   data->declared_data =
       calloc(data->declared, sizeof(JdwpReferenceTypeMethodsMethodData));
 
   for (size_t i = 0; i < data->declared; i++) {
     data->declared_data[i].method_id =
-        serde_read_variable_adv(&ptr, id_sizes->method_id_size);
+        serde_read_variable_adv(&ptr, ctx->id_sizes->method_id_size);
     data->declared_data[i].name = serde_read_string_adv(&ptr);
     data->declared_data[i].signature = serde_read_string_adv(&ptr);
     data->declared_data[i].mod_bits = serde_read_uint32_adv(&ptr);
   }
 
 cleanup:
-  *reply = rep;
+  *ctx->reply = rep;
 
   return JDWP_LIB_ERR_NONE;
 }

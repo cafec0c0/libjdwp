@@ -79,56 +79,52 @@ JdwpLibError vm_command_serialize(uint8_t **buf, size_t *len, void *command,
   }
 }
 
-JdwpLibError vm_command_deserialize(JdwpReply **reply, size_t *len,
-                                    uint8_t *bytes, JdwpCommandType type,
-                                    IdSizes *id_sizes) {
-  switch (type) {
+JdwpLibError vm_command_deserialize(DeserializationContext *ctx) {
+  switch (ctx->type) {
   case JDWP_VIRTUAL_MACHINE_VERSION:
-    return version_deserialize(reply, len, bytes, type, id_sizes);
+    return version_deserialize(ctx);
   case JDWP_VIRTUAL_MACHINE_CLASSES_BY_SIGNATURE:
-    return classes_by_signature_deserialize(reply, len, bytes, type, id_sizes);
+    return classes_by_signature_deserialize(ctx);
   case JDWP_VIRTUAL_MACHINE_ALL_CLASSES:
-    return all_classes_deserialize(reply, len, bytes, type, id_sizes);
+    return all_classes_deserialize(ctx);
   case JDWP_VIRTUAL_MACHINE_ALL_THREADS:
-    return all_threads_deserialize(reply, len, bytes, type, id_sizes);
+    return all_threads_deserialize(ctx);
   case JDWP_VIRTUAL_MACHINE_TOP_LEVEL_THREAD_GROUPS:
-    return top_level_thread_groups_deserialize(reply, len, bytes, type,
-                                               id_sizes);
+    return top_level_thread_groups_deserialize(ctx);
   case JDWP_VIRTUAL_MACHINE_DISPOSE:
-    return dispose_deserialize(reply, len, bytes, type, id_sizes);
+    return dispose_deserialize(ctx);
   case JDWP_VIRTUAL_MACHINE_ID_SIZES:
-    return id_sizes_deserialize(reply, len, bytes, type, id_sizes);
+    return id_sizes_deserialize(ctx);
   case JDWP_VIRTUAL_MACHINE_SUSPEND:
-    return suspend_deserialize(reply, len, bytes, type, id_sizes);
+    return suspend_deserialize(ctx);
   case JDWP_VIRTUAL_MACHINE_RESUME:
-    return resume_deserialize(reply, len, bytes, type, id_sizes);
+    return resume_deserialize(ctx);
   case JDWP_VIRTUAL_MACHINE_EXIT:
-    return exit_deserialize(reply, len, bytes, type, id_sizes);
+    return exit_deserialize(ctx);
   case JDWP_VIRTUAL_MACHINE_CREATE_STRING:
-    return create_string_deserialize(reply, len, bytes, type, id_sizes);
+    return create_string_deserialize(ctx);
   case JDWP_VIRTUAL_MACHINE_CAPABILITIES:
-    return capabilities_deserialize(reply, len, bytes, type, id_sizes);
+    return capabilities_deserialize(ctx);
   case JDWP_VIRTUAL_MACHINE_CLASS_PATHS:
-    return class_paths_deserialize(reply, len, bytes, type, id_sizes);
+    return class_paths_deserialize(ctx);
   case JDWP_VIRTUAL_MACHINE_DISPOSE_OBJECTS:
-    return dispose_objects_deserialize(reply, len, bytes, type, id_sizes);
+    return dispose_objects_deserialize(ctx);
   case JDWP_VIRTUAL_MACHINE_HOLD_EVENTS:
-    return hold_events_deserialize(reply, len, bytes, type, id_sizes);
+    return hold_events_deserialize(ctx);
   case JDWP_VIRTUAL_MACHINE_RELEASE_EVENTS:
-    return release_events_deserialize(reply, len, bytes, type, id_sizes);
+    return release_events_deserialize(ctx);
   case JDWP_VIRTUAL_MACHINE_CAPABILITIES_NEW:
-    return capabilities_new_deserialize(reply, len, bytes, type, id_sizes);
+    return capabilities_new_deserialize(ctx);
   case JDWP_VIRTUAL_MACHINE_REDEFINE_CLASSES:
-    return redefine_classes_deserialize(reply, len, bytes, type, id_sizes);
+    return redefine_classes_deserialize(ctx);
   case JDWP_VIRTUAL_MACHINE_SET_DEFAULT_STRATUM:
-    return set_default_stratum_deserialize(reply, len, bytes, type, id_sizes);
+    return set_default_stratum_deserialize(ctx);
   case JDWP_VIRTUAL_MACHINE_ALL_CLASSES_WITH_GENERIC:
-    return all_classes_with_generic_deserialize(reply, len, bytes, type,
-                                                id_sizes);
+    return all_classes_with_generic_deserialize(ctx);
   case JDWP_VIRTUAL_MACHINE_INSTANCE_COUNTS:
-    return instance_counts_deserialize(reply, len, bytes, type, id_sizes);
+    return instance_counts_deserialize(ctx);
   case JDWP_VIRTUAL_MACHINE_ALL_MODULES:
-    return all_modules_deserialize(reply, len, bytes, type, id_sizes);
+    return all_modules_deserialize(ctx);
   default:
     return JDWP_LIB_ERR_UNKNOWN_COMMAND;
   }

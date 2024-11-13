@@ -42,15 +42,18 @@ static void test_dispose_objects_deserialize(void **state) {
   uint8_t vm_reply[] = "\000\000\000\v\000\000\000\001\200\000\000";
 
   JdwpReply *reply;
-  size_t len;
-  JdwpLibError e = dispose_objects_deserialize(
-      &reply, &len, vm_reply, JDWP_VIRTUAL_MACHINE_CLASSES_BY_SIGNATURE,
-      &id_sizes);
+  DeserializationContext ctx = {
+      .reply = &reply,
+      .bytes = vm_reply,
+      .type = JDWP_VIRTUAL_MACHINE_DISPOSE_OBJECTS,
+      .id_sizes = &id_sizes,
+  };
+  JdwpLibError e = dispose_objects_deserialize(&ctx);
 
   assert_int_equal(e, JDWP_LIB_ERR_NONE);
   assert_non_null(reply);
   assert_int_equal(reply->id, 1);
-  assert_int_equal(reply->type, JDWP_VIRTUAL_MACHINE_CLASSES_BY_SIGNATURE);
+  assert_int_equal(reply->type, JDWP_VIRTUAL_MACHINE_DISPOSE_OBJECTS);
   assert_int_equal(reply->error, 0);
   assert_non_null(reply->data);
 

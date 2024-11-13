@@ -8,7 +8,7 @@
 
 #define REPLY_NEW(name, reply_struct)                                          \
   JdwpReply *name = malloc(sizeof(JdwpReply));                                 \
-  if (!reply)                                                                  \
+  if (!name)                                                                   \
     return JDWP_LIB_ERR_MALLOC;                                                \
                                                                                \
   reply_struct *data = malloc(sizeof(reply_struct));                           \
@@ -36,11 +36,10 @@ typedef struct {
   uint8_t *bytes;
   JdwpCommandType type;
   IdSizes *id_sizes;
-} ReplyDeserializationRequest;
+} DeserializationContext;
 
 void reply_read_header(ReplyHeader *header, uint8_t *buf);
 
-JdwpLibError reply_deserialize(JdwpReply **reply, size_t *len, uint8_t *bytes,
-                               JdwpCommandType type, IdSizes *id_sizes);
+JdwpLibError reply_deserialize(DeserializationContext *ctx);
 
 #endif // REPLY_H

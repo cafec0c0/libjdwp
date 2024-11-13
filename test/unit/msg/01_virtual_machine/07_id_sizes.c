@@ -31,9 +31,12 @@ static void test_id_sizes_deserialize(void **state) {
                        "\000\000\000\b\000\000\000\b\000\000\000\b";
 
   JdwpReply *reply;
-  size_t len;
-  JdwpLibError e = id_sizes_deserialize(&reply, &len, vm_reply,
-                                        JDWP_VIRTUAL_MACHINE_ID_SIZES, NULL);
+  DeserializationContext ctx = {
+      .reply = &reply,
+      .bytes = vm_reply,
+      .type = JDWP_VIRTUAL_MACHINE_ID_SIZES,
+  };
+  JdwpLibError e = id_sizes_deserialize(&ctx);
 
   assert_int_equal(e, JDWP_LIB_ERR_NONE);
   assert_non_null(reply);

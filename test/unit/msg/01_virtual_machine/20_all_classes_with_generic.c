@@ -44,10 +44,13 @@ static void test_all_classes_with_generic_deserialize(void **state) {
       "\000\000\000\a";
 
   JdwpReply *reply;
-  size_t len;
-  JdwpLibError e = all_classes_with_generic_deserialize(
-      &reply, &len, vm_reply, JDWP_VIRTUAL_MACHINE_ALL_CLASSES_WITH_GENERIC,
-      &id_sizes);
+  DeserializationContext ctx = {
+      .reply = &reply,
+      .bytes = vm_reply,
+      .type = JDWP_VIRTUAL_MACHINE_ALL_CLASSES_WITH_GENERIC,
+      .id_sizes = &id_sizes,
+  };
+  JdwpLibError e = all_classes_with_generic_deserialize(&ctx);
 
   assert_int_equal(e, JDWP_LIB_ERR_NONE);
   assert_non_null(reply);

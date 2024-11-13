@@ -36,22 +36,20 @@ JdwpLibError dispose_objects_serialize(uint8_t **buf, size_t *len,
   return JDWP_LIB_ERR_NONE;
 }
 
-JdwpLibError dispose_objects_deserialize(JdwpReply **reply, size_t *len,
-                                         uint8_t *bytes, JdwpCommandType type,
-                                         IdSizes *id_sizes) {
+JdwpLibError dispose_objects_deserialize(DeserializationContext *ctx) {
   REPLY_NEW(rep, JdwpVirtualMachineDisposeObjectsData)
 
   ReplyHeader header;
-  reply_read_header(&header, bytes);
+  reply_read_header(&header, ctx->bytes);
 
-  REPLY_POPULATE(rep, header.error, header.id, type)
+  REPLY_POPULATE(rep, header.error, header.id, ctx->type)
 
   if (header.error) {
     free(data);
     rep->data = NULL;
   }
 
-  *reply = rep;
+  *ctx->reply = rep;
 
   return JDWP_LIB_ERR_NONE;
 }

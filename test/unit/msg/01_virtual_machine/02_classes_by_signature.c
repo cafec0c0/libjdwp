@@ -37,10 +37,13 @@ static void test_classes_by_signature_deserialize(void **state) {
       "\000\000\000\000\000\001\000\000\000\a";
 
   JdwpReply *reply;
-  size_t len;
-  JdwpLibError e = classes_by_signature_deserialize(
-      &reply, &len, vm_reply, JDWP_VIRTUAL_MACHINE_CLASSES_BY_SIGNATURE,
-      &id_sizes);
+  DeserializationContext ctx = {
+      .reply = &reply,
+      .bytes = vm_reply,
+      .type = JDWP_VIRTUAL_MACHINE_CLASSES_BY_SIGNATURE,
+      .id_sizes = &id_sizes,
+  };
+  JdwpLibError e = classes_by_signature_deserialize(&ctx);
 
   assert_int_equal(e, JDWP_LIB_ERR_NONE);
   assert_non_null(reply);

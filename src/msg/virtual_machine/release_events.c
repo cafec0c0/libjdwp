@@ -19,15 +19,13 @@ JdwpLibError release_events_serialize(uint8_t **buf, size_t *len, void *command,
   return JDWP_LIB_ERR_NONE;
 }
 
-JdwpLibError release_events_deserialize(JdwpReply **reply, size_t *len,
-                                        uint8_t *bytes, JdwpCommandType type,
-                                        IdSizes *id_sizes) {
+JdwpLibError release_events_deserialize(DeserializationContext *ctx) {
   REPLY_NEW(rep, JdwpVirtualMachineReleaseEventsData)
 
   ReplyHeader header;
-  reply_read_header(&header, bytes);
+  reply_read_header(&header, ctx->bytes);
 
-  REPLY_POPULATE(rep, header.error, header.id, type)
+  REPLY_POPULATE(rep, header.error, header.id, ctx->type)
 
   if (header.error) {
     free(data);
@@ -35,7 +33,7 @@ JdwpLibError release_events_deserialize(JdwpReply **reply, size_t *len,
   }
 
 cleanup:
-  *reply = rep;
+  *ctx->reply = rep;
 
   return JDWP_LIB_ERR_NONE;
 }

@@ -29,9 +29,12 @@ static void test_resume_deserialize(void **state) {
   uint8_t vm_reply[] = "\000\000\000\013\000\000\000\001\200\000\000";
 
   JdwpReply *reply;
-  size_t len;
-  JdwpLibError e = resume_deserialize(&reply, &len, vm_reply,
-                                      JDWP_VIRTUAL_MACHINE_RESUME, NULL);
+  DeserializationContext ctx = {
+      .reply = &reply,
+      .bytes = vm_reply,
+      .type = JDWP_VIRTUAL_MACHINE_RESUME,
+  };
+  JdwpLibError e = resume_deserialize(&ctx);
 
   assert_int_equal(e, JDWP_LIB_ERR_NONE);
   assert_non_null(reply);

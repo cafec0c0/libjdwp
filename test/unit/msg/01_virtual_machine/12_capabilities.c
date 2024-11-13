@@ -30,9 +30,12 @@ static void test_capabilities_deserialize(void **state) {
                         0x0, 0x0, 0x1, 0x1,  0x1, 0x1, 0x1, 0x1, 0x1};
 
   JdwpReply *reply;
-  size_t len;
-  JdwpLibError e = capabilities_deserialize(
-      &reply, &len, vm_reply, JDWP_VIRTUAL_MACHINE_CAPABILITIES, NULL);
+  DeserializationContext ctx = {
+      .reply = &reply,
+      .bytes = vm_reply,
+      .type = JDWP_VIRTUAL_MACHINE_CAPABILITIES,
+  };
+  JdwpLibError e = capabilities_deserialize(&ctx);
 
   assert_int_equal(e, JDWP_LIB_ERR_NONE);
   assert_non_null(reply);
