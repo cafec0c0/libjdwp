@@ -9,5 +9,9 @@ include(CTest)
 add_library(jdwp SHARED)
 target_include_directories(jdwp PRIVATE include)
 
+if (WIN32 OR MINGW OR MSVC OR MSYS)
+	target_link_libraries(jdwp PRIVATE Ws2_32 Mswsock Advapi32)
+endif()
+
 add_subdirectory(src)
 add_subdirectory(test)

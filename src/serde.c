@@ -1,6 +1,11 @@
 #include "serde.h"
 
+#ifdef __linux__
 #include <arpa/inet.h>
+#elif _WIN32
+#include <winsock2.h>
+#endif
+
 #include <stdlib.h>
 #include <string.h>
 

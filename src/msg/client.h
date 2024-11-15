@@ -7,8 +7,16 @@
 #include "command.h"
 #include "serde.h"
 
+#ifdef _WIN32
+#include <winsock2.h>
+#endif
+
 typedef struct {
+#ifdef _WIN32
+	SOCKET *sockfd;
+#else
   int *sockfd;
+#endif
   size_t *command_attr_buffer_len;
   CommandAttr *command_attr_buffer;
   JdwpReplyCallback callback;
@@ -18,7 +26,11 @@ typedef struct {
 } ThreadContext;
 
 typedef struct {
+#if _WIN32
+	SOCKET sockfd;
+#else
   int sockfd;
+#endif
   pthread_t thread;
   pthread_mutex_t write_mutex;
   size_t command_attr_buffer_len;
