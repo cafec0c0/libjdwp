@@ -1,13 +1,13 @@
 #include "serde.h"
 
-#ifdef __linux__
-#include <arpa/inet.h>
-#elif _WIN32
-#include <winsock2.h>
-#endif
-
 #include <stdlib.h>
 #include <string.h>
+
+#ifdef _WIN32
+#include <winsock2.h>
+#else
+#include <arpa/inet.h>
+#endif
 
 void serde_write_uint8(uint8_t *buffer, uint8_t value) {
   memcpy(buffer, &value, sizeof(uint8_t));

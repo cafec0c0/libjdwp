@@ -1,15 +1,13 @@
 #include "client.h"
 
-#if defined(__LINUX__)
-#include <arpa/inet.h>
-#include <netinet/in.h>
-#endif
-
-#if defined(_WIN32)
+#ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>
+#else
+#include <arpa/inet.h>
+#include <netinet/in.h>
 #endif
 
 #include <stdlib.h>
@@ -25,6 +23,39 @@
 #include <stdio.h>
 
 #define DEFAULT_BUFFER_LEN 128
+
+static void jdwp_socket_close(JdwpSocket sockfd) {
+#ifdef _WIN32
+  closesocket(sockfd);
+#else
+  close(sockfd);
+#endif
+}
+
+static void jdwp_socket_shutdown(JdwpSocket sockfd) {
+#ifdef _WIN32
+  shutdown(sockfd, SD_BOTH);
+#else
+  shutdown(sockfd, SHUT_RDWR);
+#endif
+}
+
+#ifdef _WIN32
+static int has_initialized_winsock = 0;
+
+static JdwpLibError try_init_winsock() {
+  WSADATA wsa_data;
+  int res;
+  if (!has_initialized_winsock) {
+    res = WSAStartup(MAKEWORD(2, 2), &wsa_data);
+    has_initialized_winsock = 1;
+    if (res != 0) {
+      return JDWP_LIB_ERR_NATIVE;
+    }
+  }
+  return JDWP_LIB_ERR_NONE;
+}
+#endif
 
 JdwpLibError jdwp_client_new(JdwpClient *client) {
   if (!client)
@@ -97,7 +128,7 @@ static ssize_t insert_into_buffer(CommandAttr *command_attr_buffer, size_t len,
       return idx;
     }
   }
-  
+
   return -1;
 }
 
@@ -278,13 +309,8 @@ static JdwpLibError init_id_sizes(IdSizes **id_sizes, int sockfd, uint32_t id) {
   return JDWP_LIB_ERR_NONE;
 }
 
-#ifdef _WIN32
-static int has_initialized_winsock = 0;
-#endif
-
 JdwpLibError jdwp_client_connect(JdwpClient client, const char *hostname,
                                  uint16_t port) {
-printf("connect\n");
   if (!client)
     return JDWP_LIB_ERR_NULL_POINTER;
 
@@ -293,46 +319,42 @@ printf("connect\n");
       calloc(c->command_attr_buffer_len, sizeof(CommandAttr));
   if (!c->command_attr_buffer)
     return JDWP_LIB_ERR_MALLOC;
-#if defined(__linux__)
-  struct sockaddr_in serv_addr;
-  int sockfd = socket(AF_INET, SOCK_STREAM, 0);
-#else
-  WSADATA wsa_data;
-  int res;
-printf("has initialzied winsock: %d\n", has_initialized_winsock);
-  if (!has_initialized_winsock) {
-    res = WSAStartup(MAKEWORD(2,2), &wsa_data);
-    has_initialized_winsock = 1;
-    if (res != 0) {
-	printf("socket failed with error: %ld\n", WSAGetLastError());
-	return JDWP_LIB_ERR_NATIVE;
-}
+
+#ifdef _WIN32
+  JdwpLibError err = try_init_winsock();
+  if (err != JDWP_LIB_ERR_NONE) {
+    return err;
   }
 
   struct addrinfo *result = NULL, *ptr = NULL, hints;
-ZeroMemory( &hints, sizeof(hints) );
+  ZeroMemory(&hints, sizeof(hints));
   hints.ai_family = AF_INET;
   hints.ai_socktype = SOCK_STREAM;
-//  hints.ai_flags = AI_PASSIVE;
-//  hints.ai_protocol = IPPROTO_TCP;
 
-  char stupid_windows_port[10];
-  sprintf(stupid_windows_port, "%d", port);
-printf("port: %s\n", stupid_windows_port);
+  char port_string[6];
+  sprintf(port_string, "%d", port);
 
-  res = getaddrinfo(hostname, stupid_windows_port, &hints, &result);
+  int res;
+  res = getaddrinfo(hostname, port_string, &hints, &result);
   if (res != 0) {
- fprintf(stderr, "getaddrinfo error: %s\n", gai_strerror(res));
-printf("pp socket failed with error: %ld\n", WSAGetLastError());
-	  return JDWP_LIB_ERR_NATIVE;
-}
-  SOCKET sockfd = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
-  if (sockfd == INVALID_SOCKET) {
-printf("aa socket failed with error: %ld\n", WSAGetLastError());
-	  return JDWP_LIB_ERR_NATIVE;
+    return JDWP_LIB_ERR_NATIVE;
   }
-#endif 
-#ifdef __linux__
+
+  JdwpSocket sockfd =
+      socket(result->ai_family, result->ai_socktype, result->ai_protocol);
+  if (sockfd == INVALID_SOCKET) {
+    return JDWP_LIB_ERR_NATIVE;
+  }
+
+  res = connect(sockfd, result->ai_addr, (int)result->ai_addrlen);
+  if (res == SOCKET_ERROR) {
+    jdwp_socket_close(sockfd);
+    return JDWP_LIB_ERR_NATIVE;
+  }
+#else
+  struct sockaddr_in serv_addr;
+  JdwpSocket sockfd = socket(AF_INET, SOCK_STREAM, 0);
+
   if (sockfd == -1) {
     return JDWP_LIB_ERR_NATIVE;
   }
@@ -351,47 +373,25 @@ printf("aa socket failed with error: %ld\n", WSAGetLastError());
     return JDWP_LIB_ERR_NATIVE;
   }
 #endif
-#ifdef _WIN32
-  res = connect(sockfd, result->ai_addr, (int)result->ai_addrlen);
-  if (res == SOCKET_ERROR)
-{
-printf("socket failed with error: %ld\n", WSAGetLastError());
-	closesocket(sockfd);
-	return JDWP_LIB_ERR_NATIVE;
-}
-#endif
 
   c->sockfd = sockfd;
 
   JdwpLibError err = handshake(c->sockfd);
   if (err) {
-#ifdef __linux__
-    close(c->sockfd);
-#else
-	closesocket(c->sockfd);
-#endif
+    jdwp_socket_close(c->sockfd);
     return err;
   }
 
   IdSizes *id_sizes;
   err = init_id_sizes(&id_sizes, c->sockfd, c->next_id++);
   if (err) {
-#ifdef __linux__
-    close(c->sockfd);
-#else
-	closesocket(c->sockfd);
-#endif
+    jdwp_socket_close(c->sockfd);
     return err;
   }
 
   err = spawn_listener_thread(c, id_sizes, c->callback, c->callback_state);
   if (err) {
-#ifdef __linux__
-    close(c->sockfd);
-#else
-	 closesocket(c->sockfd);
-#endif
-
+    jdwp_socket_close(c->sockfd);
     return err;
   }
 
@@ -442,18 +442,10 @@ JdwpLibError jdwp_client_disconnect(JdwpClient client) {
   if (cl->ctx)
     cl->ctx->should_exit = 1;
 
-#ifdef __linux__
-  shutdown(cl->sockfd, SHUT_RDWR);
-#else
-  shutdown(cl->sockfd, SD_BOTH);
-#endif
+  jdwp_socket_shutdown(cl->sockfd);
   pthread_join(cl->thread, NULL);
 
-#ifdef __linux__
-  close(cl->sockfd);
-#else
-  closesocket(cl->sockfd);
-#endif
+  jdwp_socket_close(cl->sockfd);
   return JDWP_LIB_ERR_NONE;
 }
 
