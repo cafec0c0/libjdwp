@@ -85,8 +85,20 @@ jobs:
       - test_e2e
     steps:
       - uses: actions/checkout@v4
-      - name: Install dependencies
-        run: sudo apt update --quiet && sudo apt install --quiet -y libcmocka-dev
+      - name: Configure
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+      - name: Build library
+        run: cmake --build build --target jdwp
+
+  build_release_windows:
+    name: Build Release
+    runs-on: windows-latest
+    needs:
+      - test_unit
+      - test_unit_memcheck
+      - test_e2e
+    steps:
+      - uses: actions/checkout@v4
       - name: Configure
         run: cmake -B build -DCMAKE_BUILD_TYPE=Release
       - name: Build library
