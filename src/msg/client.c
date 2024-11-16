@@ -145,7 +145,7 @@ static void remove_from_buffer(CommandAttr *command_attr_buffer, size_t len,
 static JdwpLibError client_read_full_reply(uint8_t **buf, int sockfd) {
   uint8_t length_buf[4] = {0};
 
-  ssize_t bytes_read = recv(sockfd, length_buf, 4, MSG_WAITALL);
+  ssize_t bytes_read = recv(sockfd, (char *)length_buf, 4, MSG_WAITALL);
   if (bytes_read == 0)
     return JDWP_LIB_ERR_EOF;
   if (bytes_read == -1)
@@ -158,7 +158,8 @@ static JdwpLibError client_read_full_reply(uint8_t **buf, int sockfd) {
   }
 
   memcpy(*buf, length_buf, 4);
-  bytes_read = recv(sockfd, *buf + 4, jdwp_reply_len - 4, MSG_WAITALL);
+  bytes_read =
+      recv(sockfd, (char *)(*buf + 4), jdwp_reply_len - 4, MSG_WAITALL);
   if (bytes_read == 0)
     return JDWP_LIB_ERR_EOF;
   if (bytes_read == -1)
@@ -268,14 +269,14 @@ static JdwpLibError init_id_sizes(IdSizes **id_sizes, int sockfd, uint32_t id) {
   if (err)
     return err;
 
-  ssize_t bytes_sent = send(sockfd, buf, len, 0);
+  ssize_t bytes_sent = send(sockfd, (char *)buf, len, 0);
   free(buf);
   if (bytes_sent == -1) {
     return JDWP_LIB_ERR_NATIVE;
   }
 
   uint8_t in_buf[11 + (5 * 4)];
-  ssize_t bytes_read = recv(sockfd, in_buf, 11 + (5 * 4), MSG_WAITALL);
+  ssize_t bytes_read = recv(sockfd, (char *)in_buf, 11 + (5 * 4), MSG_WAITALL);
   if (bytes_read == 0)
     return JDWP_LIB_ERR_EOF;
   if (bytes_read == -1)
@@ -328,7 +329,7 @@ JdwpLibError jdwp_client_connect(JdwpClient client, const char *hostname,
     return err;
   }
 
-  struct addrinfo *result = NULL, *ptr = NULL, hints;
+  struct addrinfo *result = NULL, hints;
   ZeroMemory(&hints, sizeof(hints));
   hints.ai_family = AF_INET;
   hints.ai_socktype = SOCK_STREAM;
@@ -423,7 +424,7 @@ JdwpLibError jdwp_client_send(JdwpClient client, uint32_t id,
   if (err)
     goto cleanup;
 
-  ssize_t bytes_sent = send(c->sockfd, buf, len, 0);
+  ssize_t bytes_sent = send(c->sockfd, (char *)buf, len, 0);
   if (bytes_sent == -1) {
     err = JDWP_LIB_ERR_NATIVE;
   }
