@@ -320,8 +320,9 @@ JdwpLibError jdwp_client_connect(JdwpClient client, const char *hostname,
   if (!c->command_attr_buffer)
     return JDWP_LIB_ERR_MALLOC;
 
+  JdwpLibError err;
 #ifdef _WIN32
-  JdwpLibError err = try_init_winsock();
+  err = try_init_winsock();
   if (err != JDWP_LIB_ERR_NONE) {
     return err;
   }
@@ -376,7 +377,7 @@ JdwpLibError jdwp_client_connect(JdwpClient client, const char *hostname,
 
   c->sockfd = sockfd;
 
-  JdwpLibError err = handshake(c->sockfd);
+  err = handshake(c->sockfd);
   if (err) {
     jdwp_socket_close(c->sockfd);
     return err;
