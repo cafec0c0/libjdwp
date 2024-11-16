@@ -14,7 +14,7 @@ JdwpLibError redefine_classes_serialize(uint8_t **buf, size_t *len,
 
   // calculate size up front (to prevent excessive reallocs)
   uint32_t length = 11 + 4;
-  for (int i = 0; i < cmd->classes; i++) {
+  for (uint32_t i = 0; i < cmd->classes; i++) {
     length += id_sizes->reference_type_id_size + 4;
     length += cmd->classes_data[i].classfile;
   }

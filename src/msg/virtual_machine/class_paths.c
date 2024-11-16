@@ -5,6 +5,9 @@
 JdwpLibError class_paths_serialize(uint8_t **buf, size_t *len, void *command,
                                    JdwpCommandType type, IdSizes *id_sizes,
                                    uint32_t id) {
+  (void)command;
+  (void)id_sizes;
+
   uint8_t *buffer = malloc(11);
   if (!buffer)
     return JDWP_LIB_ERR_MALLOC;
@@ -35,13 +38,13 @@ JdwpLibError class_paths_deserialize(DeserializationContext *ctx) {
   data->base_dir = serde_read_string_adv(&ptr);
   data->class_paths = serde_read_uint32_adv(&ptr);
   data->class_paths_data = calloc(data->class_paths, sizeof(char *));
-  for (int i = 0; i < data->class_paths; i++) {
+  for (uint32_t i = 0; i < data->class_paths; i++) {
     data->class_paths_data[i] = serde_read_string_adv(&ptr);
   }
 
   data->boot_class_paths = serde_read_uint32_adv(&ptr);
   data->boot_class_paths_data = calloc(data->boot_class_paths, sizeof(char *));
-  for (int i = 0; i < data->boot_class_paths; i++) {
+  for (uint32_t i = 0; i < data->boot_class_paths; i++) {
     data->boot_class_paths_data[i] = serde_read_string_adv(&ptr);
   }
 
@@ -54,10 +57,10 @@ cleanup:
 void class_paths_free(JdwpReply *reply) {
   JdwpVirtualMachineClassPathsData *data = reply->data;
   free(data->base_dir);
-  for (int i = 0; i < data->class_paths; i++)
+  for (uint32_t i = 0; i < data->class_paths; i++)
     free(data->class_paths_data[i]);
   free(data->class_paths_data);
-  for (int i = 0; i < data->boot_class_paths; i++)
+  for (uint32_t i = 0; i < data->boot_class_paths; i++)
     free(data->boot_class_paths_data[i]);
   free(data->boot_class_paths_data);
   free(data);

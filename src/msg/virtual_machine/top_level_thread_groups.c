@@ -7,6 +7,9 @@ JdwpLibError top_level_thread_groups_serialize(uint8_t **buf, size_t *len,
                                                void *command,
                                                JdwpCommandType type,
                                                IdSizes *id_sizes, uint32_t id) {
+  (void)command;
+  (void)id_sizes;
+
   uint8_t *buffer = malloc(11);
 
   if (!buffer)
@@ -39,7 +42,7 @@ JdwpLibError top_level_thread_groups_deserialize(DeserializationContext *ctx) {
   data->groups_data =
       calloc(data->groups, sizeof(JdwpVirtualMachineTopLevelThreadGroupsGroup));
 
-  for (int i = 0; i < data->groups; i++) {
+  for (size_t i = 0; i < data->groups; i++) {
     data->groups_data[i].group =
         serde_read_variable_adv(&ptr, ctx->id_sizes->object_id_size);
   }

@@ -6,6 +6,7 @@
 JdwpLibError exit_serialize(uint8_t **buf, size_t *len, void *command,
                             JdwpCommandType type, IdSizes *id_sizes,
                             uint32_t id) {
+  (void)id_sizes;
 
   JdwpVirtualMachineExitCommand *cmd = command;
 
@@ -32,7 +33,6 @@ JdwpLibError exit_deserialize(DeserializationContext *ctx) {
 
   REPLY_POPULATE(rep, header.error, header.id, ctx->type)
 
-cleanup:
   *ctx->reply = rep;
 
   return JDWP_LIB_ERR_NONE;

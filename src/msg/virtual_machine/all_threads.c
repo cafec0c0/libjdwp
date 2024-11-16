@@ -6,6 +6,9 @@
 JdwpLibError all_threads_serialize(uint8_t **buf, size_t *len, void *command,
                                    JdwpCommandType type, IdSizes *id_sizes,
                                    uint32_t id) {
+  (void)command;
+  (void)id_sizes;
+
   uint8_t *buffer = malloc(11);
 
   if (!buffer)
@@ -38,7 +41,7 @@ JdwpLibError all_threads_deserialize(DeserializationContext *ctx) {
   data->threads_data =
       calloc(data->threads, sizeof(JdwpVirtualMachineAllThreadsThread));
 
-  for (int i = 0; i < data->threads; i++) {
+  for (size_t i = 0; i < data->threads; i++) {
     data->threads_data[i].thread =
         serde_read_variable_adv(&ptr, ctx->id_sizes->object_id_size);
   }

@@ -6,6 +6,9 @@
 JdwpLibError all_classes_serialize(uint8_t **buf, size_t *len, void *command,
                                    JdwpCommandType type, IdSizes *id_sizes,
                                    uint32_t id) {
+  (void)command;
+  (void)id_sizes;
+
   uint8_t *buffer = malloc(11);
 
   if (!buffer)
@@ -38,7 +41,7 @@ JdwpLibError all_classes_deserialize(DeserializationContext *ctx) {
   data->classes_data =
       calloc(data->classes, sizeof(JdwpVirtualMachineAllClassesClassData));
 
-  for (int i = 0; i < data->classes; i++) {
+  for (size_t i = 0; i < data->classes; i++) {
     data->classes_data[i].ref_type_tag = serde_read_uint8_adv(&ptr);
     data->classes_data[i].type_id =
         serde_read_variable_adv(&ptr, ctx->id_sizes->object_id_size);

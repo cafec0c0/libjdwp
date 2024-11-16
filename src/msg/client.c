@@ -114,12 +114,11 @@ static CommandAttr *find_in_buffer(CommandAttr *command_attr_buffer, size_t len,
 }
 
 static ssize_t insert_into_buffer(CommandAttr *command_attr_buffer, size_t len,
-                                  uint32_t id, JdwpCommandType type,
-                                  void *command) {
+                                  uint32_t id, JdwpCommandType type) {
   if (!command_attr_buffer)
     return -1;
 
-  for (ssize_t idx = 0; idx < len; idx++) {
+  for (ssize_t idx = 0; idx < (ssize_t)len; idx++) {
     CommandAttr *attr = command_attr_buffer + idx;
     if (!attr->is_occupied) {
       attr->is_occupied = 1;
@@ -211,6 +210,8 @@ void *client_listen(void *context) {
     remove_from_buffer(ctx->command_attr_buffer, *ctx->command_attr_buffer_len,
                        attr->id);
   }
+
+  return NULL;
 }
 
 JdwpLibError spawn_listener_thread(Client *client, IdSizes *id_sizes,
@@ -273,7 +274,7 @@ static JdwpLibError init_id_sizes(IdSizes **id_sizes, int sockfd, uint32_t id) {
     return JDWP_LIB_ERR_NATIVE;
   }
 
-  char in_buf[11 + (5 * 4)];
+  uint8_t in_buf[11 + (5 * 4)];
   ssize_t bytes_read = recv(sockfd, in_buf, 11 + (5 * 4), MSG_WAITALL);
   if (bytes_read == 0)
     return JDWP_LIB_ERR_EOF;
@@ -411,7 +412,7 @@ JdwpLibError jdwp_client_send(JdwpClient client, uint32_t id,
 
   // try to insert into buffer
   if (insert_into_buffer(c->command_attr_buffer, c->command_attr_buffer_len, id,
-                         type, command) == -1) {
+                         type) == -1) {
     err = JDWP_LIB_ERR_COMMAND_BUFFER_FULL;
     goto cleanup;
   }

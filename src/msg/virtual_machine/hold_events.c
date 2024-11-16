@@ -6,6 +6,9 @@
 JdwpLibError hold_events_serialize(uint8_t **buf, size_t *len, void *command,
                                    JdwpCommandType type, IdSizes *id_sizes,
                                    uint32_t id) {
+  (void)command;
+  (void)id_sizes;
+
   uint8_t *buffer = malloc(11);
 
   if (!buffer)
@@ -27,7 +30,6 @@ JdwpLibError hold_events_deserialize(DeserializationContext *ctx) {
 
   REPLY_POPULATE(rep, header.error, header.id, ctx->type)
 
-cleanup:
   *ctx->reply = rep;
 
   return JDWP_LIB_ERR_NONE;

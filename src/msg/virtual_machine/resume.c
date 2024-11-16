@@ -6,6 +6,9 @@
 JdwpLibError resume_serialize(uint8_t **buf, size_t *len, void *command,
                               JdwpCommandType type, IdSizes *id_sizes,
                               uint32_t id) {
+  (void)command;
+  (void)id_sizes;
+
   uint8_t *buffer = malloc(11);
 
   if (!buffer)
@@ -31,7 +34,6 @@ JdwpLibError resume_deserialize(DeserializationContext *ctx) {
     free(data);
   }
 
-cleanup:
   *ctx->reply = rep;
 
   return JDWP_LIB_ERR_NONE;

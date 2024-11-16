@@ -6,6 +6,7 @@
 JdwpLibError set_default_stratum_serialize(uint8_t **buf, size_t *len,
                                            void *command, JdwpCommandType type,
                                            IdSizes *id_sizes, uint32_t id) {
+  (void)id_sizes;
 
   JdwpVirtualMachineSetDefaultStratumCommand *cmd = command;
 
