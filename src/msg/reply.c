@@ -45,7 +45,7 @@ void jdwp_reply_free(JdwpReply **reply) {
     break;
   case 0x0200:
     ref_type_reply_free(*reply);
-  default:
+  default:;
   }
 
   *reply = NULL;
