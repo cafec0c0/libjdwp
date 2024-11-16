@@ -54,10 +54,8 @@ static void test(void **state) {
   err = jdwp_client_connect(client, "127.0.0.1", 8000);
   assert_int_equal(err, JDWP_LIB_ERR_NONE);
 
-  JdwpVirtualMachineAllThreadsCommand cmd = {};
-  uint32_t id;
-  err = jdwp_client_send(client, &id,
-                         JDWP_VIRTUAL_MACHINE_TOP_LEVEL_THREAD_GROUPS, &cmd);
+  err = jdwp_client_send(client, 105,
+                         JDWP_VIRTUAL_MACHINE_TOP_LEVEL_THREAD_GROUPS, NULL);
   assert_int_equal(err, JDWP_LIB_ERR_NONE);
 
   while (!((State *)*state)->should_exit) {

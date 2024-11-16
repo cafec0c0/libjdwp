@@ -52,8 +52,8 @@ static void test(void **state) {
   assert_int_equal(err, JDWP_LIB_ERR_NONE);
 
   JdwpVirtualMachineCreateStringCommand cmd = {.utf = "a string"};
-  uint32_t id;
-  err = jdwp_client_send(client, &id, JDWP_VIRTUAL_MACHINE_CREATE_STRING, &cmd);
+
+  err = jdwp_client_send(client, 111, JDWP_VIRTUAL_MACHINE_CREATE_STRING, &cmd);
   assert_int_equal(err, JDWP_LIB_ERR_NONE);
 
   while (!((State *)*state)->should_exit) {

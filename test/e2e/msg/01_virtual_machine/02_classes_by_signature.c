@@ -59,8 +59,8 @@ static void test(void **state) {
 
   JdwpVirtualMachineClassesBySignatureCommand cmd = {.signature =
                                                          "Ljava/lang/String;"};
-  uint32_t id;
-  err = jdwp_client_send(client, &id, JDWP_VIRTUAL_MACHINE_CLASSES_BY_SIGNATURE,
+
+  err = jdwp_client_send(client, 102, JDWP_VIRTUAL_MACHINE_CLASSES_BY_SIGNATURE,
                          &cmd);
   assert_int_equal(err, JDWP_LIB_ERR_NONE);
 

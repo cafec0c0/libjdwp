@@ -11,8 +11,7 @@
 static void test_suspend_serialize(void **state) {
   uint8_t *buf = NULL;
   size_t bytes_written;
-  JdwpVirtualMachineSuspendCommand cmd = {};
-  JdwpLibError e = suspend_serialize(&buf, &bytes_written, &cmd,
+  JdwpLibError e = suspend_serialize(&buf, &bytes_written, NULL,
                                      JDWP_VIRTUAL_MACHINE_SUSPEND, NULL, 1);
 
   uint8_t expected[] = "\000\000\000\013\000\000\000\001\000\001\010";

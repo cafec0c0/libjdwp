@@ -59,10 +59,8 @@ static void test(void **state) {
   err = jdwp_client_connect(client, "127.0.0.1", 8000);
   assert_int_equal(err, JDWP_LIB_ERR_NONE);
 
-  JdwpVirtualMachineAllClassesWithGenericCommand cmd = {};
-  uint32_t id;
-  err = jdwp_client_send(client, &id,
-                         JDWP_VIRTUAL_MACHINE_ALL_CLASSES_WITH_GENERIC, &cmd);
+  err = jdwp_client_send(client, 120,
+                         JDWP_VIRTUAL_MACHINE_ALL_CLASSES_WITH_GENERIC, NULL);
   assert_int_equal(err, JDWP_LIB_ERR_NONE);
 
   while (!((State *)*state)->should_exit) {

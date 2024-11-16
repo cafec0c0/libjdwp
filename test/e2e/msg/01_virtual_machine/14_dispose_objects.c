@@ -61,10 +61,9 @@ static void test(void **state) {
   assert_int_equal(err, JDWP_LIB_ERR_NONE);
 
   // Create a string to dispose
-  uint32_t id;
   JdwpVirtualMachineCreateStringCommand s_cmd = {.utf = "new string"};
   err =
-      jdwp_client_send(client, &id, JDWP_VIRTUAL_MACHINE_CREATE_STRING, &s_cmd);
+      jdwp_client_send(client, 114, JDWP_VIRTUAL_MACHINE_CREATE_STRING, &s_cmd);
   assert_int_equal(err, JDWP_LIB_ERR_NONE);
 
   while (!st->has_string_id) {
@@ -80,7 +79,7 @@ static void test(void **state) {
   };
 
   err =
-      jdwp_client_send(client, &id, JDWP_VIRTUAL_MACHINE_DISPOSE_OBJECTS, &cmd);
+      jdwp_client_send(client, 115, JDWP_VIRTUAL_MACHINE_DISPOSE_OBJECTS, &cmd);
   assert_int_equal(err, JDWP_LIB_ERR_NONE);
 
   while (!st->should_exit) {

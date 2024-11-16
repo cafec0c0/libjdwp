@@ -70,8 +70,7 @@ static void test(void **state) {
   JdwpVirtualMachineClassesBySignatureCommand c_cmd = {.signature =
                                                            "LAnotherClass;"};
 
-  uint32_t id;
-  jdwp_client_send(client, &id, JDWP_VIRTUAL_MACHINE_CLASSES_BY_SIGNATURE,
+  jdwp_client_send(client, 121, JDWP_VIRTUAL_MACHINE_CLASSES_BY_SIGNATURE,
                    &c_cmd);
   assert_int_equal(err, JDWP_LIB_ERR_NONE);
 
@@ -85,7 +84,7 @@ static void test(void **state) {
   };
 
   err =
-      jdwp_client_send(client, &id, JDWP_VIRTUAL_MACHINE_INSTANCE_COUNTS, &cmd);
+      jdwp_client_send(client, 122, JDWP_VIRTUAL_MACHINE_INSTANCE_COUNTS, &cmd);
   assert_int_equal(err, JDWP_LIB_ERR_NONE);
 
   while (!((State *)*state)->should_exit) {

@@ -13,9 +13,8 @@ static IdSizes id_sizes = {.object_id_size = 8};
 static void test_all_modules_serialize(void **state) {
   uint8_t *buf = NULL;
   size_t bytes_written;
-  JdwpVirtualMachineAllModulesCommand cmd = {};
   JdwpLibError e =
-      all_modules_serialize(&buf, &bytes_written, &cmd,
+      all_modules_serialize(&buf, &bytes_written, NULL,
                             JDWP_VIRTUAL_MACHINE_ALL_MODULES, &id_sizes, 1);
 
   uint8_t expected[] = "\000\000\000\v\000\000\000\001\000\001\026";

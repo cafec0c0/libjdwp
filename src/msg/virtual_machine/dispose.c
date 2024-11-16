@@ -20,7 +20,7 @@ JdwpLibError dispose_serialize(uint8_t **buf, size_t *len, void *command,
 }
 
 JdwpLibError dispose_deserialize(DeserializationContext *ctx) {
-  REPLY_NEW(rep, JdwpVirtualMachineDisposeData)
+  REPLY_NEW_EMPTY(rep)
 
   ReplyHeader header;
   reply_read_header(&header, ctx->bytes);
@@ -38,8 +38,4 @@ cleanup:
   return JDWP_LIB_ERR_NONE;
 }
 
-void dispose_free(JdwpReply *reply) {
-  JdwpVirtualMachineDisposeData *data = reply->data;
-  free(data);
-  free(reply);
-}
+void dispose_free(JdwpReply *reply) { free(reply); }

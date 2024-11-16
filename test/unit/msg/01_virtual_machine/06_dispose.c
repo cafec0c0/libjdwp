@@ -11,8 +11,7 @@
 static void test_dispose_serialize(void **state) {
   uint8_t *buf = NULL;
   size_t bytes_written;
-  JdwpVirtualMachineDisposeCommand cmd = {};
-  JdwpLibError e = dispose_serialize(&buf, &bytes_written, &cmd,
+  JdwpLibError e = dispose_serialize(&buf, &bytes_written, NULL,
                                      JDWP_VIRTUAL_MACHINE_DISPOSE, NULL, 1);
 
   uint8_t expected[] = "\000\000\000\013\000\000\000\001\000\001\006";

@@ -20,7 +20,7 @@ JdwpLibError suspend_serialize(uint8_t **buf, size_t *len, void *command,
 }
 
 JdwpLibError suspend_deserialize(DeserializationContext *ctx) {
-  REPLY_NEW(rep, JdwpVirtualMachineSuspendData)
+  REPLY_NEW_EMPTY(rep)
 
   ReplyHeader header;
   reply_read_header(&header, ctx->bytes);
@@ -38,8 +38,4 @@ cleanup:
   return JDWP_LIB_ERR_NONE;
 }
 
-void suspend_free(JdwpReply *reply) {
-  JdwpVirtualMachineSuspendData *data = reply->data;
-  free(data);
-  free(reply);
-}
+void suspend_free(JdwpReply *reply) { free(reply); }

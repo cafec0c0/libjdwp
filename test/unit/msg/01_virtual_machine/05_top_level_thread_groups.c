@@ -13,9 +13,8 @@ static IdSizes id_sizes = {.object_id_size = 8};
 static void test_top_level_thread_groups_serialize(void **state) {
   uint8_t *buf = NULL;
   size_t bytes_written;
-  JdwpVirtualMachineAllThreadsCommand cmd = {};
   JdwpLibError e = top_level_thread_groups_serialize(
-      &buf, &bytes_written, &cmd, JDWP_VIRTUAL_MACHINE_TOP_LEVEL_THREAD_GROUPS,
+      &buf, &bytes_written, NULL, JDWP_VIRTUAL_MACHINE_TOP_LEVEL_THREAD_GROUPS,
       NULL, 1);
 
   uint8_t expected[] = "\000\000\000\013\000\000\000\001\000\001\005";

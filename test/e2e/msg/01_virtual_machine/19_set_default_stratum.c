@@ -49,8 +49,8 @@ static void test(void **state) {
   assert_int_equal(err, JDWP_LIB_ERR_NONE);
 
   JdwpVirtualMachineSetDefaultStratumCommand cmd = {.stratum_id = ""};
-  uint32_t id;
-  err = jdwp_client_send(client, &id, JDWP_VIRTUAL_MACHINE_SET_DEFAULT_STRATUM,
+
+  err = jdwp_client_send(client, 119, JDWP_VIRTUAL_MACHINE_SET_DEFAULT_STRATUM,
                          &cmd);
   assert_int_equal(err, JDWP_LIB_ERR_NONE);
 

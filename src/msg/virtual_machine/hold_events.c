@@ -20,17 +20,12 @@ JdwpLibError hold_events_serialize(uint8_t **buf, size_t *len, void *command,
 }
 
 JdwpLibError hold_events_deserialize(DeserializationContext *ctx) {
-  REPLY_NEW(rep, JdwpVirtualMachineHoldEventsData)
+  REPLY_NEW_EMPTY(rep)
 
   ReplyHeader header;
   reply_read_header(&header, ctx->bytes);
 
   REPLY_POPULATE(rep, header.error, header.id, ctx->type)
-
-  if (header.error) {
-    free(data);
-    rep->data = NULL;
-  }
 
 cleanup:
   *ctx->reply = rep;
@@ -38,8 +33,4 @@ cleanup:
   return JDWP_LIB_ERR_NONE;
 }
 
-void hold_events_free(JdwpReply *reply) {
-  JdwpVirtualMachineHoldEventsData *data = reply->data;
-  free(data);
-  free(reply);
-}
+void hold_events_free(JdwpReply *reply) { free(reply); }
