@@ -403,7 +403,7 @@ JdwpLibError jdwp_client_connect(JdwpClient client, const char *hostname,
 
 JdwpLibError jdwp_client_send(JdwpClient client, uint32_t id,
                               JdwpCommandType type, void *command) {
-  if (!client || !command)
+  if (!client)
     return JDWP_LIB_ERR_NULL_POINTER;
 
   Client *c = client;
