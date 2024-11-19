@@ -6,6 +6,9 @@
 JdwpLibError all_modules_serialize(uint8_t **buf, size_t *len, void *command,
                                    JdwpCommandType type, IdSizes *id_sizes,
                                    uint32_t id) {
+  (void)command;
+  (void)id_sizes;
+
   uint8_t *buffer = malloc(11);
 
   if (!buffer)
@@ -37,7 +40,7 @@ JdwpLibError all_modules_deserialize(DeserializationContext *ctx) {
   data->modules = serde_read_uint32_adv(&ptr);
   data->modules_data = calloc(data->modules, sizeof(uint64_t));
 
-  for (int i = 0; i < data->modules; i++) {
+  for (uint32_t i = 0; i < data->modules; i++) {
     data->modules_data[i] =
         serde_read_variable_adv(&ptr, ctx->id_sizes->object_id_size);
   }

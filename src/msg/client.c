@@ -1,7 +1,15 @@
 #include "client.h"
 
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#else
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#endif
+
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -15,6 +23,39 @@
 #include <stdio.h>
 
 #define DEFAULT_BUFFER_LEN 128
+
+static void jdwp_socket_close(JdwpSocket sockfd) {
+#ifdef _WIN32
+  closesocket(sockfd);
+#else
+  close(sockfd);
+#endif
+}
+
+static void jdwp_socket_shutdown(JdwpSocket sockfd) {
+#ifdef _WIN32
+  shutdown(sockfd, SD_BOTH);
+#else
+  shutdown(sockfd, SHUT_RDWR);
+#endif
+}
+
+#ifdef _WIN32
+static int has_initialized_winsock = 0;
+
+static JdwpLibError try_init_winsock() {
+  WSADATA wsa_data;
+  int res;
+  if (!has_initialized_winsock) {
+    res = WSAStartup(MAKEWORD(2, 2), &wsa_data);
+    has_initialized_winsock = 1;
+    if (res != 0) {
+      return JDWP_LIB_ERR_NATIVE;
+    }
+  }
+  return JDWP_LIB_ERR_NONE;
+}
+#endif
 
 JdwpLibError jdwp_client_new(JdwpClient *client) {
   if (!client)
@@ -36,6 +77,7 @@ JdwpLibError jdwp_client_new(JdwpClient *client) {
 
   return JDWP_LIB_ERR_NONE;
 }
+
 JdwpLibError jdwp_client_set_buffer_size(JdwpClient *client, size_t size) {
   if (!client)
     return JDWP_LIB_ERR_NULL_POINTER;
@@ -72,12 +114,11 @@ static CommandAttr *find_in_buffer(CommandAttr *command_attr_buffer, size_t len,
 }
 
 static ssize_t insert_into_buffer(CommandAttr *command_attr_buffer, size_t len,
-                                  uint32_t id, JdwpCommandType type,
-                                  void *command) {
+                                  uint32_t id, JdwpCommandType type) {
   if (!command_attr_buffer)
     return -1;
 
-  for (ssize_t idx = 0; idx < len; idx++) {
+  for (ssize_t idx = 0; idx < (ssize_t)len; idx++) {
     CommandAttr *attr = command_attr_buffer + idx;
     if (!attr->is_occupied) {
       attr->is_occupied = 1;
@@ -104,7 +145,7 @@ static void remove_from_buffer(CommandAttr *command_attr_buffer, size_t len,
 static JdwpLibError client_read_full_reply(uint8_t **buf, int sockfd) {
   uint8_t length_buf[4] = {0};
 
-  ssize_t bytes_read = recv(sockfd, length_buf, 4, MSG_WAITALL);
+  ssize_t bytes_read = recv(sockfd, (char *)length_buf, 4, MSG_WAITALL);
   if (bytes_read == 0)
     return JDWP_LIB_ERR_EOF;
   if (bytes_read == -1)
@@ -117,7 +158,8 @@ static JdwpLibError client_read_full_reply(uint8_t **buf, int sockfd) {
   }
 
   memcpy(*buf, length_buf, 4);
-  bytes_read = recv(sockfd, *buf + 4, jdwp_reply_len - 4, MSG_WAITALL);
+  bytes_read =
+      recv(sockfd, (char *)(*buf + 4), jdwp_reply_len - 4, MSG_WAITALL);
   if (bytes_read == 0)
     return JDWP_LIB_ERR_EOF;
   if (bytes_read == -1)
@@ -169,6 +211,8 @@ void *client_listen(void *context) {
     remove_from_buffer(ctx->command_attr_buffer, *ctx->command_attr_buffer_len,
                        attr->id);
   }
+
+  return NULL;
 }
 
 JdwpLibError spawn_listener_thread(Client *client, IdSizes *id_sizes,
@@ -225,14 +269,14 @@ static JdwpLibError init_id_sizes(IdSizes **id_sizes, int sockfd, uint32_t id) {
   if (err)
     return err;
 
-  ssize_t bytes_sent = send(sockfd, buf, len, 0);
+  ssize_t bytes_sent = send(sockfd, (char *)buf, len, 0);
   free(buf);
   if (bytes_sent == -1) {
     return JDWP_LIB_ERR_NATIVE;
   }
 
-  char in_buf[11 + (5 * 4)];
-  ssize_t bytes_read = recv(sockfd, in_buf, 11 + (5 * 4), MSG_WAITALL);
+  uint8_t in_buf[11 + (5 * 4)];
+  ssize_t bytes_read = recv(sockfd, (char *)in_buf, 11 + (5 * 4), MSG_WAITALL);
   if (bytes_read == 0)
     return JDWP_LIB_ERR_EOF;
   if (bytes_read == -1)
@@ -278,8 +322,42 @@ JdwpLibError jdwp_client_connect(JdwpClient client, const char *hostname,
   if (!c->command_attr_buffer)
     return JDWP_LIB_ERR_MALLOC;
 
+  JdwpLibError err;
+#ifdef _WIN32
+  err = try_init_winsock();
+  if (err != JDWP_LIB_ERR_NONE) {
+    return err;
+  }
+
+  struct addrinfo *result = NULL, hints;
+  ZeroMemory(&hints, sizeof(hints));
+  hints.ai_family = AF_INET;
+  hints.ai_socktype = SOCK_STREAM;
+
+  char port_string[6];
+  sprintf(port_string, "%d", port);
+
+  int res;
+  res = getaddrinfo(hostname, port_string, &hints, &result);
+  if (res != 0) {
+    return JDWP_LIB_ERR_NATIVE;
+  }
+
+  JdwpSocket sockfd =
+      socket(result->ai_family, result->ai_socktype, result->ai_protocol);
+  if (sockfd == INVALID_SOCKET) {
+    return JDWP_LIB_ERR_NATIVE;
+  }
+
+  res = connect(sockfd, result->ai_addr, (int)result->ai_addrlen);
+  if (res == SOCKET_ERROR) {
+    jdwp_socket_close(sockfd);
+    return JDWP_LIB_ERR_NATIVE;
+  }
+#else
   struct sockaddr_in serv_addr;
-  int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+  JdwpSocket sockfd = socket(AF_INET, SOCK_STREAM, 0);
+
   if (sockfd == -1) {
     return JDWP_LIB_ERR_NATIVE;
   }
@@ -297,25 +375,26 @@ JdwpLibError jdwp_client_connect(JdwpClient client, const char *hostname,
   if (connect(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) == -1) {
     return JDWP_LIB_ERR_NATIVE;
   }
+#endif
 
   c->sockfd = sockfd;
 
-  JdwpLibError err = handshake(c->sockfd);
+  err = handshake(c->sockfd);
   if (err) {
-    close(c->sockfd);
+    jdwp_socket_close(c->sockfd);
     return err;
   }
 
   IdSizes *id_sizes;
   err = init_id_sizes(&id_sizes, c->sockfd, c->next_id++);
   if (err) {
-    close(c->sockfd);
+    jdwp_socket_close(c->sockfd);
     return err;
   }
 
   err = spawn_listener_thread(c, id_sizes, c->callback, c->callback_state);
   if (err) {
-    close(c->sockfd);
+    jdwp_socket_close(c->sockfd);
     return err;
   }
 
@@ -324,7 +403,7 @@ JdwpLibError jdwp_client_connect(JdwpClient client, const char *hostname,
 
 JdwpLibError jdwp_client_send(JdwpClient client, uint32_t id,
                               JdwpCommandType type, void *command) {
-  if (!client || !command)
+  if (!client)
     return JDWP_LIB_ERR_NULL_POINTER;
 
   Client *c = client;
@@ -334,7 +413,7 @@ JdwpLibError jdwp_client_send(JdwpClient client, uint32_t id,
 
   // try to insert into buffer
   if (insert_into_buffer(c->command_attr_buffer, c->command_attr_buffer_len, id,
-                         type, command) == -1) {
+                         type) == -1) {
     err = JDWP_LIB_ERR_COMMAND_BUFFER_FULL;
     goto cleanup;
   }
@@ -345,7 +424,7 @@ JdwpLibError jdwp_client_send(JdwpClient client, uint32_t id,
   if (err)
     goto cleanup;
 
-  ssize_t bytes_sent = send(c->sockfd, buf, len, 0);
+  ssize_t bytes_sent = send(c->sockfd, (char *)buf, len, 0);
   if (bytes_sent == -1) {
     err = JDWP_LIB_ERR_NATIVE;
   }
@@ -366,10 +445,10 @@ JdwpLibError jdwp_client_disconnect(JdwpClient client) {
   if (cl->ctx)
     cl->ctx->should_exit = 1;
 
-  shutdown(cl->sockfd, SHUT_RDWR);
+  jdwp_socket_shutdown(cl->sockfd);
   pthread_join(cl->thread, NULL);
 
-  close(cl->sockfd);
+  jdwp_socket_close(cl->sockfd);
   return JDWP_LIB_ERR_NONE;
 }
 

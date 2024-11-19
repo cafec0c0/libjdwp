@@ -46,7 +46,7 @@ static void test_set_default_stratum_deserialize(void **state) {
   assert_int_equal(reply->id, 1);
   assert_int_equal(reply->type, JDWP_VIRTUAL_MACHINE_SET_DEFAULT_STRATUM);
   assert_int_equal(reply->error, 0);
-  assert_non_null(reply->data);
+  assert_null(reply->data);
 
   set_default_stratum_free(reply);
 }

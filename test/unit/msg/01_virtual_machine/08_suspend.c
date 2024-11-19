@@ -11,8 +11,7 @@
 static void test_suspend_serialize(void **state) {
   uint8_t *buf = NULL;
   size_t bytes_written;
-  JdwpVirtualMachineSuspendCommand cmd = {};
-  JdwpLibError e = suspend_serialize(&buf, &bytes_written, &cmd,
+  JdwpLibError e = suspend_serialize(&buf, &bytes_written, NULL,
                                      JDWP_VIRTUAL_MACHINE_SUSPEND, NULL, 1);
 
   uint8_t expected[] = "\000\000\000\013\000\000\000\001\000\001\010";
@@ -41,7 +40,7 @@ static void test_suspend_deserialize(void **state) {
   assert_int_equal(reply->id, 1);
   assert_int_equal(reply->type, JDWP_VIRTUAL_MACHINE_SUSPEND);
   assert_int_equal(reply->error, 0);
-  assert_non_null(reply->data);
+  assert_null(reply->data);
 
   suspend_free(reply);
 }

@@ -52,7 +52,7 @@ JdwpLibError instance_counts_deserialize(DeserializationContext *ctx) {
   data->counts = serde_read_uint32_adv(&ptr);
   data->instance_count_data = calloc(data->counts, sizeof(uint64_t));
 
-  for (int i = 0; i < data->counts; i++)
+  for (uint32_t i = 0; i < data->counts; i++)
     data->instance_count_data[i] = serde_read_uint64_adv(&ptr);
 
 cleanup:

@@ -11,8 +11,7 @@
 static void test_resume_serialize(void **state) {
   uint8_t *buf = NULL;
   size_t bytes_written;
-  JdwpVirtualMachineResumeCommand cmd = {};
-  JdwpLibError e = resume_serialize(&buf, &bytes_written, &cmd,
+  JdwpLibError e = resume_serialize(&buf, &bytes_written, NULL,
                                     JDWP_VIRTUAL_MACHINE_RESUME, NULL, 1);
 
   uint8_t expected[] = "\000\000\000\013\000\000\000\001\000\001\011";
@@ -41,7 +40,7 @@ static void test_resume_deserialize(void **state) {
   assert_int_equal(reply->id, 1);
   assert_int_equal(reply->type, JDWP_VIRTUAL_MACHINE_RESUME);
   assert_int_equal(reply->error, 0);
-  assert_non_null(reply->data);
+  assert_null(reply->data);
 
   resume_free(reply);
 }

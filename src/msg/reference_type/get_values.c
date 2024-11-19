@@ -56,13 +56,13 @@ JdwpLibError ref_type_get_values_deserialize(DeserializationContext *ctx) {
     data->values_data[i].value = NULL; // TODO: implement
   }
 
-cleanup:
   *ctx->reply = rep;
 
   return JDWP_LIB_ERR_NONE;
 }
 
 void ref_type_get_values_free(JdwpReply *reply) {
+  (void)reply;
   // JdwpReferenceTypeGetValuesData *data = reply->data;
   // for (size_t i = 0; i < data->declared; i++) {
   //   free(data->declared_data[i].name);

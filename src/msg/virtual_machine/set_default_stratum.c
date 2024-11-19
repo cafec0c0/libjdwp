@@ -6,6 +6,7 @@
 JdwpLibError set_default_stratum_serialize(uint8_t **buf, size_t *len,
                                            void *command, JdwpCommandType type,
                                            IdSizes *id_sizes, uint32_t id) {
+  (void)id_sizes;
 
   JdwpVirtualMachineSetDefaultStratumCommand *cmd = command;
 
@@ -29,25 +30,16 @@ JdwpLibError set_default_stratum_serialize(uint8_t **buf, size_t *len,
 }
 
 JdwpLibError set_default_stratum_deserialize(DeserializationContext *ctx) {
-  REPLY_NEW(rep, JdwpVirtualMachineSetDefaultStratumData)
+  REPLY_NEW_EMPTY(rep)
 
   ReplyHeader header;
   reply_read_header(&header, ctx->bytes);
 
   REPLY_POPULATE(rep, header.error, header.id, ctx->type)
 
-  if (header.error) {
-    free(data);
-    rep->data = NULL;
-  }
-
   *ctx->reply = rep;
 
   return JDWP_LIB_ERR_NONE;
 }
 
-void set_default_stratum_free(JdwpReply *reply) {
-  JdwpVirtualMachineSetDefaultStratumData *data = reply->data;
-  free(data);
-  free(reply);
-}
+void set_default_stratum_free(JdwpReply *reply) { free(reply); }

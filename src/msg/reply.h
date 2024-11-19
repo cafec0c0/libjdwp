@@ -17,6 +17,13 @@
     return JDWP_LIB_ERR_MALLOC;                                                \
   }
 
+#define REPLY_NEW_EMPTY(name)                                                  \
+  JdwpReply *name = malloc(sizeof(JdwpReply));                                 \
+  if (!name)                                                                   \
+    return JDWP_LIB_ERR_MALLOC;                                                \
+                                                                               \
+  void *data = NULL;
+
 #define REPLY_POPULATE(reply, error_val, id_val, type_val)                     \
   reply->data = data;                                                          \
   reply->error = error_val;                                                    \

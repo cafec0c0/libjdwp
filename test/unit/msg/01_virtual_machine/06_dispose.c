@@ -11,8 +11,7 @@
 static void test_dispose_serialize(void **state) {
   uint8_t *buf = NULL;
   size_t bytes_written;
-  JdwpVirtualMachineDisposeCommand cmd = {};
-  JdwpLibError e = dispose_serialize(&buf, &bytes_written, &cmd,
+  JdwpLibError e = dispose_serialize(&buf, &bytes_written, NULL,
                                      JDWP_VIRTUAL_MACHINE_DISPOSE, NULL, 1);
 
   uint8_t expected[] = "\000\000\000\013\000\000\000\001\000\001\006";
@@ -41,7 +40,7 @@ static void test_dispose_deserialize(void **state) {
   assert_int_equal(reply->id, 1);
   assert_int_equal(reply->type, JDWP_VIRTUAL_MACHINE_DISPOSE);
   assert_int_equal(reply->error, 0);
-  assert_non_null(reply->data);
+  assert_null(reply->data);
 
   dispose_free(reply);
 }

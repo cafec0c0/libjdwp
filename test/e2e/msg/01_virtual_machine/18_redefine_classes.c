@@ -88,10 +88,9 @@ static void test(void **state) {
   assert_int_equal(err, JDWP_LIB_ERR_NONE);
 
   // Get ref ID for AnotherClass
-  uint32_t id;
   JdwpVirtualMachineClassesBySignatureCommand c_cmd = {.signature =
                                                            "LAnotherClass;"};
-  err = jdwp_client_send(client, &id, JDWP_VIRTUAL_MACHINE_CLASSES_BY_SIGNATURE,
+  err = jdwp_client_send(client, 118, JDWP_VIRTUAL_MACHINE_CLASSES_BY_SIGNATURE,
                          &c_cmd);
   assert_int_equal(err, JDWP_LIB_ERR_NONE);
 
@@ -108,7 +107,7 @@ static void test(void **state) {
       .classes_data = &obj,
   };
 
-  err = jdwp_client_send(client, &id, JDWP_VIRTUAL_MACHINE_REDEFINE_CLASSES,
+  err = jdwp_client_send(client, 119, JDWP_VIRTUAL_MACHINE_REDEFINE_CLASSES,
                          &cmd);
   assert_int_equal(err, JDWP_LIB_ERR_NONE);
 

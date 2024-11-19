@@ -13,9 +13,8 @@ static IdSizes id_sizes = {.reference_type_id_size = 8};
 static void test_all_classes_with_generic_serialize(void **state) {
   uint8_t *buf = NULL;
   size_t bytes_written;
-  JdwpVirtualMachineAllClassesCommand cmd = {};
   JdwpLibError e = all_classes_with_generic_serialize(
-      &buf, &bytes_written, &cmd, JDWP_VIRTUAL_MACHINE_ALL_CLASSES_WITH_GENERIC,
+      &buf, &bytes_written, NULL, JDWP_VIRTUAL_MACHINE_ALL_CLASSES_WITH_GENERIC,
       NULL, 1);
 
   uint8_t expected[] = "\000\000\000\013\000\000\000\001\000\001\024";

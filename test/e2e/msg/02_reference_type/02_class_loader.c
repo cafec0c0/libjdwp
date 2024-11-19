@@ -60,12 +60,10 @@ static void test(void **state) {
   err = jdwp_client_connect(client, "127.0.0.1", 8000);
   assert_int_equal(err, JDWP_LIB_ERR_NONE);
 
-  uint32_t id;
-
   // Get reference for testing
   JdwpVirtualMachineClassesBySignatureCommand c_cmd = {
       .signature = "Ljava/lang/String;"};
-  err = jdwp_client_send(client, &id, JDWP_VIRTUAL_MACHINE_CLASSES_BY_SIGNATURE,
+  err = jdwp_client_send(client, 202, JDWP_VIRTUAL_MACHINE_CLASSES_BY_SIGNATURE,
                          &c_cmd);
   assert_int_equal(err, JDWP_LIB_ERR_NONE);
 
@@ -74,7 +72,7 @@ static void test(void **state) {
 
   JdwpReferenceTypeClassLoaderCommand cmd = {.ref_type =
                                                  ((State *)*state)->ref};
-  err = jdwp_client_send(client, &id, JDWP_REFERENCE_TYPE_CLASS_LOADER, &cmd);
+  err = jdwp_client_send(client, 203, JDWP_REFERENCE_TYPE_CLASS_LOADER, &cmd);
   assert_int_equal(err, JDWP_LIB_ERR_NONE);
 
   while (!((State *)*state)->should_exit) {

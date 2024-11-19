@@ -37,25 +37,16 @@ JdwpLibError dispose_objects_serialize(uint8_t **buf, size_t *len,
 }
 
 JdwpLibError dispose_objects_deserialize(DeserializationContext *ctx) {
-  REPLY_NEW(rep, JdwpVirtualMachineDisposeObjectsData)
+  REPLY_NEW_EMPTY(rep)
 
   ReplyHeader header;
   reply_read_header(&header, ctx->bytes);
 
   REPLY_POPULATE(rep, header.error, header.id, ctx->type)
 
-  if (header.error) {
-    free(data);
-    rep->data = NULL;
-  }
-
   *ctx->reply = rep;
 
   return JDWP_LIB_ERR_NONE;
 }
 
-void dispose_objects_free(JdwpReply *reply) {
-  JdwpVirtualMachineDisposeObjectsData *data = reply->data;
-  free(data);
-  free(reply);
-}
+void dispose_objects_free(JdwpReply *reply) { free(reply); }

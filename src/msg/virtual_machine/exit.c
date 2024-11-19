@@ -6,6 +6,7 @@
 JdwpLibError exit_serialize(uint8_t **buf, size_t *len, void *command,
                             JdwpCommandType type, IdSizes *id_sizes,
                             uint32_t id) {
+  (void)id_sizes;
 
   JdwpVirtualMachineExitCommand *cmd = command;
 
@@ -25,26 +26,16 @@ JdwpLibError exit_serialize(uint8_t **buf, size_t *len, void *command,
 }
 
 JdwpLibError exit_deserialize(DeserializationContext *ctx) {
-  REPLY_NEW(rep, JdwpVirtualMachineExitData)
+  REPLY_NEW_EMPTY(rep)
 
   ReplyHeader header;
   reply_read_header(&header, ctx->bytes);
 
   REPLY_POPULATE(rep, header.error, header.id, ctx->type)
 
-  if (header.error) {
-    free(data);
-    rep->data = NULL;
-  }
-
-cleanup:
   *ctx->reply = rep;
 
   return JDWP_LIB_ERR_NONE;
 }
 
-void exit_free(JdwpReply *reply) {
-  JdwpVirtualMachineExitData *data = reply->data;
-  free(data);
-  free(reply);
-}
+void exit_free(JdwpReply *reply) { free(reply); }

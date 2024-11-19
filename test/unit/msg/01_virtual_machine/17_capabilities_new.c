@@ -11,9 +11,8 @@
 static void test_capabilities_new_serialize(void **state) {
   uint8_t *buf = NULL;
   size_t bytes_written;
-  JdwpVirtualMachineCapabilitiesNewCommand cmd = {};
   JdwpLibError e = capabilities_new_serialize(
-      &buf, &bytes_written, &cmd, JDWP_VIRTUAL_MACHINE_CAPABILITIES_NEW, NULL,
+      &buf, &bytes_written, NULL, JDWP_VIRTUAL_MACHINE_CAPABILITIES_NEW, NULL,
       1);
 
   uint8_t expected[] = "\000\000\000\013\000\000\000\001\000\001\021";

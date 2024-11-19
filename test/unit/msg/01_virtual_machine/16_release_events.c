@@ -11,9 +11,8 @@
 static void test_release_events_serialize(void **state) {
   uint8_t *buf = NULL;
   size_t bytes_written;
-  JdwpVirtualMachineReleaseEventsCommand cmd = {};
   JdwpLibError e = release_events_serialize(
-      &buf, &bytes_written, &cmd, JDWP_VIRTUAL_MACHINE_RELEASE_EVENTS, NULL, 1);
+      &buf, &bytes_written, NULL, JDWP_VIRTUAL_MACHINE_RELEASE_EVENTS, NULL, 1);
 
   uint8_t expected[] = "\000\000\000\013\000\000\000\001\000\001\020";
 
@@ -41,7 +40,7 @@ static void test_release_events_deserialize(void **state) {
   assert_int_equal(reply->id, 1);
   assert_int_equal(reply->type, JDWP_VIRTUAL_MACHINE_RELEASE_EVENTS);
   assert_int_equal(reply->error, 0);
-  assert_non_null(reply->data);
+  assert_null(reply->data);
 
   release_events_free(reply);
 }

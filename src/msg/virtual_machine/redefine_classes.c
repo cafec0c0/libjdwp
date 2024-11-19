@@ -14,7 +14,7 @@ JdwpLibError redefine_classes_serialize(uint8_t **buf, size_t *len,
 
   // calculate size up front (to prevent excessive reallocs)
   uint32_t length = 11 + 4;
-  for (int i = 0; i < cmd->classes; i++) {
+  for (uint32_t i = 0; i < cmd->classes; i++) {
     length += id_sizes->reference_type_id_size + 4;
     length += cmd->classes_data[i].classfile;
   }
@@ -44,25 +44,16 @@ JdwpLibError redefine_classes_serialize(uint8_t **buf, size_t *len,
 }
 
 JdwpLibError redefine_classes_deserialize(DeserializationContext *ctx) {
-  REPLY_NEW(rep, JdwpVirtualMachineRedefineClassesData)
+  REPLY_NEW_EMPTY(rep)
 
   ReplyHeader header;
   reply_read_header(&header, ctx->bytes);
 
   REPLY_POPULATE(rep, header.error, header.id, ctx->type)
 
-  if (header.error) {
-    free(data);
-    rep->data = NULL;
-  }
-
   *ctx->reply = rep;
 
   return JDWP_LIB_ERR_NONE;
 }
 
-void redefine_classes_free(JdwpReply *reply) {
-  JdwpVirtualMachineRedefineClassesData *data = reply->data;
-  free(data);
-  free(reply);
-}
+void redefine_classes_free(JdwpReply *reply) { free(reply); }

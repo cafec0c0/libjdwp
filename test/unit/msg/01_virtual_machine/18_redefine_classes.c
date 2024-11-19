@@ -90,7 +90,7 @@ static void test_redefine_classes_deserialize(void **state) {
   assert_int_equal(reply->id, 1);
   assert_int_equal(reply->type, JDWP_VIRTUAL_MACHINE_REDEFINE_CLASSES);
   assert_int_equal(reply->error, 0);
-  assert_non_null(reply->data);
+  assert_null(reply->data);
 
   redefine_classes_free(reply);
 }

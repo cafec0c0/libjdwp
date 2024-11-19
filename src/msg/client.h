@@ -2,13 +2,19 @@
 #define CLIENT_H
 
 #include <pthread.h>
-#include <stddef.h>
 
 #include "command.h"
 #include "serde.h"
 
+#ifdef _WIN32
+#include <winsock2.h>
+typedef SOCKET JdwpSocket;
+#else
+typedef int JdwpSocket;
+#endif
+
 typedef struct {
-  int *sockfd;
+  JdwpSocket *sockfd;
   size_t *command_attr_buffer_len;
   CommandAttr *command_attr_buffer;
   JdwpReplyCallback callback;
@@ -18,7 +24,7 @@ typedef struct {
 } ThreadContext;
 
 typedef struct {
-  int sockfd;
+  JdwpSocket sockfd;
   pthread_t thread;
   pthread_mutex_t write_mutex;
   size_t command_attr_buffer_len;

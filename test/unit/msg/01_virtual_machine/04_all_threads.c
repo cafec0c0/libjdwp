@@ -13,9 +13,8 @@ static IdSizes id_sizes = {.object_id_size = 8};
 static void test_all_threads_serialize(void **state) {
   uint8_t *buf = NULL;
   size_t bytes_written;
-  JdwpVirtualMachineAllThreadsCommand cmd = {};
   JdwpLibError e = all_threads_serialize(
-      &buf, &bytes_written, &cmd, JDWP_VIRTUAL_MACHINE_ALL_THREADS, NULL, 1);
+      &buf, &bytes_written, NULL, JDWP_VIRTUAL_MACHINE_ALL_THREADS, NULL, 1);
 
   uint8_t expected[] = "\000\000\000\013\000\000\000\001\000\001\004";
 

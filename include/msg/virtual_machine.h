@@ -3,9 +3,6 @@
 
 // Version
 typedef struct {
-} JdwpVirtualMachineVersionCommand;
-
-typedef struct {
   char *description;
   uint32_t jdwp_major;
   uint32_t jdwp_minor;
@@ -31,9 +28,6 @@ typedef struct {
 
 // All classes
 typedef struct {
-} JdwpVirtualMachineAllClassesCommand;
-
-typedef struct {
   JdwpTypeTag ref_type_tag;
   uint64_t type_id;
   char *signature;
@@ -47,9 +41,6 @@ typedef struct {
 
 // All threads
 typedef struct {
-} JdwpVirtualMachineAllThreadsCommand;
-
-typedef struct {
   uint64_t thread;
 } JdwpVirtualMachineAllThreadsThread;
 
@@ -60,9 +51,6 @@ typedef struct {
 
 // Top level thread groups
 typedef struct {
-} JdwpVirtualMachineTopLevelThreadGroupsCommand;
-
-typedef struct {
   uint64_t group;
 } JdwpVirtualMachineTopLevelThreadGroupsGroup;
 
@@ -71,17 +59,7 @@ typedef struct {
   JdwpVirtualMachineTopLevelThreadGroupsGroup *groups_data;
 } JdwpVirtualMachineTopLevelThreadGroupsData;
 
-// Dispose
-typedef struct {
-} JdwpVirtualMachineDisposeCommand;
-
-typedef struct {
-} JdwpVirtualMachineDisposeData;
-
 // Id sizes
-typedef struct {
-} JdwpVirtualMachineIdSizesCommand;
-
 typedef struct {
   uint32_t field_id_size;
   uint32_t method_id_size;
@@ -90,27 +68,10 @@ typedef struct {
   uint32_t frame_id_size;
 } JdwpVirtualMachineIdSizesData;
 
-// Suspend
-typedef struct {
-} JdwpVirtualMachineSuspendCommand;
-
-typedef struct {
-} JdwpVirtualMachineSuspendData;
-
-// Resume
-typedef struct {
-} JdwpVirtualMachineResumeCommand;
-
-typedef struct {
-} JdwpVirtualMachineResumeData;
-
-// Resume
+// Exit
 typedef struct {
   uint32_t exit_code;
 } JdwpVirtualMachineExitCommand;
-
-typedef struct {
-} JdwpVirtualMachineExitData;
 
 // Create String
 typedef struct {
@@ -123,9 +84,6 @@ typedef struct {
 
 // Capabilities
 typedef struct {
-} JdwpVirtualMachineCapabilitiesCommand;
-
-typedef struct {
   uint8_t can_watch_field_modification;
   uint8_t can_watch_field_access;
   uint8_t can_get_bytecodes;
@@ -136,8 +94,7 @@ typedef struct {
 } JdwpVirtualMachineCapabilitiesData;
 
 // Class Paths
-typedef struct {
-} JdwpVirtualMachineClassPathsCommand;
+typedef void JdwpVirtualMachineClassPathsCommand;
 
 typedef struct {
   char *base_dir;
@@ -158,27 +115,7 @@ typedef struct {
   JdwpVirtualMachineDisposeObjectsObjectData *requests_data;
 } JdwpVirtualMachineDisposeObjectsCommand;
 
-typedef struct {
-} JdwpVirtualMachineDisposeObjectsData;
-
-// Hold events
-typedef struct {
-} JdwpVirtualMachineHoldEventsCommand;
-
-typedef struct {
-} JdwpVirtualMachineHoldEventsData;
-
-// Release events
-typedef struct {
-} JdwpVirtualMachineReleaseEventsCommand;
-
-typedef struct {
-} JdwpVirtualMachineReleaseEventsData;
-
 // Capabilities new
-typedef struct {
-} JdwpVirtualMachineCapabilitiesNewCommand;
-
 typedef struct {
   uint8_t can_watch_field_modification;
   uint8_t can_watch_field_access;
@@ -226,21 +163,12 @@ typedef struct {
   JdwpVirtualMachineRedefineClassesClassData *classes_data;
 } JdwpVirtualMachineRedefineClassesCommand;
 
-typedef struct {
-} JdwpVirtualMachineRedefineClassesData;
-
 // Set default stratum
 typedef struct {
   char *stratum_id;
 } JdwpVirtualMachineSetDefaultStratumCommand;
 
-typedef struct {
-} JdwpVirtualMachineSetDefaultStratumData;
-
 // All Classes with generic
-typedef struct {
-} JdwpVirtualMachineAllClassesWithGenericCommand;
-
 typedef struct {
   JdwpTypeTag ref_type_tag;
   uint64_t type_id;
@@ -266,9 +194,6 @@ typedef struct {
 } JdwpVirtualMachineInstanceCountsData;
 
 // All modules
-typedef struct {
-} JdwpVirtualMachineAllModulesCommand;
-
 typedef struct {
   uint32_t modules;
   uint64_t *modules_data;

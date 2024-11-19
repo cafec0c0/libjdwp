@@ -6,6 +6,7 @@
 JdwpLibError classes_by_signature_serialize(uint8_t **buf, size_t *len,
                                             void *command, JdwpCommandType type,
                                             IdSizes *id_sizes, uint32_t id) {
+  (void)id_sizes;
 
   JdwpVirtualMachineClassesBySignatureCommand *cmd = command;
 
@@ -47,7 +48,7 @@ JdwpLibError classes_by_signature_deserialize(DeserializationContext *ctx) {
   data->classes_data = calloc(
       data->classes, sizeof(JdwpVirtualMachineClassesBySignatureClassData));
 
-  for (int i = 0; i < data->classes; i++) {
+  for (size_t i = 0; i < data->classes; i++) {
     data->classes_data[i].ref_type_tag = serde_read_uint8_adv(&ptr);
     data->classes_data[i].type_id =
         serde_read_variable_adv(&ptr, ctx->id_sizes->reference_type_id_size);
